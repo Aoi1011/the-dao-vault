@@ -1,2 +1,4 @@
+pub mod config;
 pub mod resolver;
-pub mod resolver_table;
+pub mod slash_request;
+pub mod slash_request_list;

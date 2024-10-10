@@ -1,8 +1,14 @@
-# Resolver Program
+# Slashing managers and arbitration systems
 
 ## Overview
 
 Resolvers are program that is able to veto slashing incidents forwarded from networks and can be shared across networks.
+
+1. Handling Slashing Incidents
+
+2. Veto Power
+
+3. Creating a Layer of Security and Fairness
 
 ## Getting started
 
