@@ -20,7 +20,7 @@ pub struct Resolver {
 }
 
 impl Discriminator for Resolver {
-    const DISCRIMINATOR: u8 = 1;
+    const DISCRIMINATOR: u8 = 2;
 }
 
 impl Resolver {
