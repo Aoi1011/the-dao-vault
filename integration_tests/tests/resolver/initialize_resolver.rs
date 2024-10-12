@@ -35,6 +35,10 @@ mod tests {
 
         let slasher = Keypair::new();
         restaking_program_client
+            ._airdrop(&slasher.pubkey(), 100.0)
+            .await
+            .unwrap();
+        restaking_program_client
             .do_initialize_ncn_vault_slasher_ticket(
                 &ncn_root,
                 &vault_root.vault_pubkey,
