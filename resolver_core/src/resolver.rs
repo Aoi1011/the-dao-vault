@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use jito_bytemuck::{types::PodU16, AccountDeserialize, Discriminator};
+use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
 use shank::{ShankAccount, ShankType};
 use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
 
@@ -13,7 +13,7 @@ pub struct Resolver {
     pub admin: Pubkey,
 
     /// The resolver index
-    pub index: PodU16,
+    index: PodU64,
 
     /// The bump seed for the PDA
     pub bump: u8,
@@ -24,6 +24,19 @@ impl Discriminator for Resolver {
 }
 
 impl Resolver {
+    pub fn new(base: Pubkey, admin: Pubkey, index: u64, bump: u8) -> Self {
+        Self {
+            base,
+            admin,
+            index: PodU64::from(index),
+            bump,
+        }
+    }
+
+    pub fn index(&self) -> u64 {
+        self.index.into()
+    }
+
     pub fn seeds(base: &Pubkey) -> Vec<Vec<u8>> {
         Vec::from_iter([b"resolver".to_vec(), base.as_ref().to_vec()])
     }

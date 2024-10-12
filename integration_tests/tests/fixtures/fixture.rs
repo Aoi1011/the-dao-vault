@@ -1,14 +1,10 @@
 use solana_program::{native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer};
 use solana_program_test::{processor, BanksClientError, ProgramTest, ProgramTestContext};
-use solana_sdk::{
-    commitment_config::CommitmentLevel, signature::Keypair, signer::Signer,
-    transaction::Transaction,
-};
+use solana_sdk::{commitment_config::CommitmentLevel, signer::Signer, transaction::Transaction};
 
 use super::{
-    resolver_client::ResolverProgramClient,
-    restaking_client::{NcnRoot, OperatorRoot, RestakingProgramClient},
-    vault_client::{VaultProgramClient, VaultRoot},
+    resolver_client::ResolverProgramClient, restaking_client::RestakingProgramClient,
+    vault_client::VaultProgramClient,
 };
 
 pub struct TestBuilder {
@@ -21,17 +17,17 @@ impl std::fmt::Debug for TestBuilder {
     }
 }
 
-pub struct ConfiguredVault {
-    pub vault_program_client: VaultProgramClient,
-    pub restaking_program_client: RestakingProgramClient,
-    pub resolver_program_client: ResolverProgramClient,
-    pub vault_config_admin: Keypair,
-    pub vault_root: VaultRoot,
-    pub restaking_config_admin: Keypair,
-    pub ncn_root: NcnRoot,
-    pub operator_roots: Vec<OperatorRoot>,
-    pub slashers_amounts: Vec<(Keypair, u64)>,
-}
+// pub struct ConfiguredVault {
+//     pub vault_program_client: VaultProgramClient,
+//     pub restaking_program_client: RestakingProgramClient,
+//     pub resolver_program_client: ResolverProgramClient,
+//     pub vault_config_admin: Keypair,
+//     pub vault_root: VaultRoot,
+//     pub restaking_config_admin: Keypair,
+//     pub ncn_root: NcnRoot,
+//     pub operator_roots: Vec<OperatorRoot>,
+//     pub slashers_amounts: Vec<(Keypair, u64)>,
+// }
 
 impl TestBuilder {
     pub async fn new() -> Self {

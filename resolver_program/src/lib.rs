@@ -12,7 +12,9 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey,
 };
 
-use crate::initialize_config::process_initialize_config;
+use crate::{
+    initialize_config::process_initialize_config, initialize_resolver::process_initialize_resolver,
+};
 
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
 
@@ -34,6 +36,11 @@ pub fn process_instruction(
         VaultInstruction::InitializeConfig => {
             msg!("Instruction: InitializeConfig");
             process_initialize_config(program_id, accounts)?;
+        }
+
+        VaultInstruction::InitializeResolver => {
+            msg!("Instruction: InitializeResolver");
+            process_initialize_resolver(program_id, accounts)?;
         }
     }
 

@@ -25,7 +25,7 @@ mod tests {
             .await
             .unwrap();
 
-        let config = resolver_program_client.get_config(&config).await.unwrap();
+        let config: Config = resolver_program_client.get_account(&config).await.unwrap();
         assert_eq!(config.admin, config_admin.pubkey());
         assert_eq!(config.jito_restaking_program, jito_restaking_program::id());
         assert_eq!(config.jito_vault_program, jito_vault_program::id());
