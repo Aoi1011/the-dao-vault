@@ -3220,6 +3220,8 @@ dependencies = [
  "borsh 0.10.3",
  "jito-bytemuck",
  "jito-jsm-core",
+ "jito-restaking-core",
+ "jito-vault-core",
  "resolver-core",
  "resolver-sdk",
  "solana-program",

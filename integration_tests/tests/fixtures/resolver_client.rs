@@ -1,5 +1,6 @@
 use jito_bytemuck::AccountDeserialize;
-use resolver_core::config::Config;
+use jito_restaking_core::ncn_vault_slasher_ticket::NcnVaultSlasherTicket;
+use resolver_core::{config::Config, resolver::Resolver};
 use solana_program::{native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer};
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -12,7 +13,6 @@ use super::TestResult;
 #[derive(Debug)]
 pub struct ResolverRoot {
     pub resolver_pubkey: Pubkey,
-    pub resolver_admin: Keypair,
 }
 
 pub struct ResolverProgramClient {
@@ -28,9 +28,25 @@ impl ResolverProgramClient {
         }
     }
 
-    pub async fn get_config(&mut self, account: &Pubkey) -> TestResult<Config> {
+    pub async fn _airdrop(&mut self, to: &Pubkey, sol: f64) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        self.banks_client
+            .process_transaction_with_preflight_and_commitment(
+                Transaction::new_signed_with_payer(
+                    &[transfer(&self.payer.pubkey(), to, sol_to_lamports(sol))],
+                    Some(&self.payer.pubkey()),
+                    &[&self.payer],
+                    blockhash,
+                ),
+                CommitmentLevel::Processed,
+            )
+            .await?;
+        Ok(())
+    }
+
+    pub async fn get_account<T: AccountDeserialize>(&mut self, account: &Pubkey) -> TestResult<T> {
         let account = self.banks_client.get_account(*account).await?.unwrap();
-        Ok(Config::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
+        Ok(T::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
     pub async fn do_initialize_config(&mut self) -> TestResult<Keypair> {
@@ -65,20 +81,72 @@ impl ResolverProgramClient {
         .await
     }
 
-    pub async fn _airdrop(&mut self, to: &Pubkey, sol: f64) -> TestResult<()> {
-        let blockhash = self.banks_client.get_latest_blockhash().await?;
-        self.banks_client
-            .process_transaction_with_preflight_and_commitment(
-                Transaction::new_signed_with_payer(
-                    &[transfer(&self.payer.pubkey(), to, sol_to_lamports(sol))],
-                    Some(&self.payer.pubkey()),
-                    &[&self.payer],
-                    blockhash,
-                ),
-                CommitmentLevel::Processed,
-            )
+    pub async fn do_initialize_resolver(
+        &mut self,
+        admin: &Keypair,
+        ncn: &Pubkey,
+        vault: &Pubkey,
+    ) -> TestResult<ResolverRoot> {
+        // create resolver + add operator vault
+        let resolver_base = Keypair::new();
+        let resolver_pubkey =
+            Resolver::find_program_address(&resolver_program::id(), &resolver_base.pubkey()).0;
+
+        self.initialize_resolver(&resolver_pubkey, admin, &resolver_base, ncn, vault)
             .await?;
-        Ok(())
+
+        Ok(ResolverRoot { resolver_pubkey })
+    }
+
+    pub async fn initialize_resolver(
+        &mut self,
+        resolver: &Pubkey,
+        admin: &Keypair,
+        base: &Keypair,
+        ncn: &Pubkey,
+        vault: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        let ncn_slasher_ticket = NcnVaultSlasherTicket::find_program_address(
+            &jito_restaking_program::id(),
+            ncn,
+            vault,
+            &admin.pubkey(),
+        )
+        .0;
+
+        println!(
+            "Config: {:?}",
+            Config::find_program_address(&resolver_program::id()).0
+        );
+        println!("resolver: {:?}", resolver);
+        println!("slasher: {:?}", admin.pubkey());
+        println!("ncn: {:?}", ncn);
+        println!("vault: {:?}", vault);
+        println!("ticket: {:?}", ncn_slasher_ticket);
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::initialize_resolver(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                resolver,
+                &admin.pubkey(),
+                &base.pubkey(),
+                ncn,
+                vault,
+                &ncn_slasher_ticket, // &NcnVaultSlasherTicket::find_program_address(
+                                     //     &jito_restaking_program::id(),
+                                     //     ncn,
+                                     //     vault,
+                                     //     &admin.pubkey(),
+                                     // )
+                                     // .0,
+            )],
+            Some(&admin.pubkey()),
+            &[admin, base],
+            blockhash,
+        ))
+        .await
     }
 
     pub async fn process_transaction(&mut self, tx: &Transaction) -> TestResult<()> {
