@@ -7,32 +7,24 @@ use solana_program::{
 
 use crate::instruction::VaultInstruction;
 
-#[allow(clippy::too_many_arguments)]
-pub fn create_token_metadata(
+pub fn initialize_config(
     program_id: &Pubkey,
-    mint_account: &Pubkey,
-    mint_authority: &Pubkey,
-    metadata: &Pubkey,
-    payer: &Pubkey,
-    token_program_id: &Pubkey,
-    name: String,
-    symbol: String,
-    uri: String,
+    config: &Pubkey,
+    admin: &Pubkey,
+    restaking_program: &Pubkey,
+    vault_program: &Pubkey,
 ) -> Instruction {
     let accounts = vec![
-        AccountMeta::new(*mint_account, true),
-        AccountMeta::new_readonly(*mint_authority, true),
-        AccountMeta::new(*metadata, false),
-        AccountMeta::new(*payer, true),
-        AccountMeta::new_readonly(*token_program_id, false),
+        AccountMeta::new(*config, false),
+        AccountMeta::new(*admin, true),
+        AccountMeta::new_readonly(*restaking_program, false),
+        AccountMeta::new_readonly(*vault_program, false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 
     Instruction {
         program_id: *program_id,
         accounts,
-        data: VaultInstruction::CreateTokenMetadata { name, symbol, uri }
-            .try_to_vec()
-            .unwrap(),
+        data: VaultInstruction::InitializeConfig.try_to_vec().unwrap(),
     }
 }

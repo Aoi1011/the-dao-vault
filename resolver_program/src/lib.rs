@@ -12,6 +12,8 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey,
 };
 
+use crate::initialize_config::process_initialize_config;
+
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -29,9 +31,9 @@ pub fn process_instruction(
     let instruction = VaultInstruction::try_from_slice(instruction_data)?;
 
     match instruction {
-        VaultInstruction::CreateTokenMetadata { name, symbol, uri } => {
-            msg!("Instruction: CreateTokenMetadata");
-            process_create_token_metadata(program_id, accounts, name, symbol, uri)?;
+        VaultInstruction::InitializeConfig => {
+            msg!("Instruction: InitializeConfig");
+            process_initialize_config(program_id, accounts)?;
         }
     }
 

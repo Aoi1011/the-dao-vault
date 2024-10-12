@@ -148,55 +148,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anstream"
-version = "0.6.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64e15c1ab1f89faffbf04a634d5e1962e9074f2741eef6d97f3c4e322426d526"
-dependencies = [
- "anstyle",
- "anstyle-parse",
- "anstyle-query",
- "anstyle-wincon",
- "colorchoice",
- "is_terminal_polyfill",
- "utf8parse",
-]
-
-[[package]]
-name = "anstyle"
-version = "1.0.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1"
-
-[[package]]
-name = "anstyle-parse"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb47de1e80c2b463c735db5b217a0ddc39d612e7ac9e2e96a5aed1f57616c1cb"
-dependencies = [
- "utf8parse",
-]
-
-[[package]]
-name = "anstyle-query"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d36fc52c7f6c869915e99412912f22093507da8d9e942ceaf66fe4b7c14422a"
-dependencies = [
- "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "anstyle-wincon"
-version = "3.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bf74e1b6e971609db8ca7a9ce79fd5768ab6ae46441c572e46cf596f59e57f8"
-dependencies = [
- "anstyle",
- "windows-sys 0.52.0",
-]
-
-[[package]]
 name = "anyhow"
 version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -209,7 +160,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1da02abba9f9063d786eab1509833ebb2fac0f966862ca59439c76b9c566760"
 dependencies = [
  "include_dir",
- "itertools 0.10.5",
+ "itertools",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -239,7 +190,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
- "itertools 0.10.5",
+ "itertools",
  "num-traits",
  "zeroize",
 ]
@@ -256,7 +207,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "digest 0.10.7",
- "itertools 0.10.5",
+ "itertools",
  "num-bigint 0.4.6",
  "num-traits",
  "paste",
@@ -885,12 +836,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "colorchoice"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3fd119d74b830634cea2a0f58bbd0d54540518a14397557951e79340abc28c0"
-
-[[package]]
 name = "combine"
 version = "3.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -950,6 +895,15 @@ name = "const-oid"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4c78c047431fee22c1a7bb92e00ad095a02a983affe4d8a72e2a2c62c1b94f3"
+
+[[package]]
+name = "const_str_to_pubkey"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "279a4314e755fb311d9e2dd6503fdc023f9c833ddceb158565b95b9323f5fd10"
+dependencies = [
+ "solana-program",
+]
 
 [[package]]
 name = "constant_time_eq"
@@ -1373,15 +1327,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "env_filter"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f2c92ceda6ceec50f43169f9ee8424fe2db276791afde7b2cd8bc084cb376ab"
-dependencies = [
- "log",
-]
-
-[[package]]
 name = "env_logger"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1392,18 +1337,6 @@ dependencies = [
  "log",
  "regex",
  "termcolor",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.11.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13fa619b91fb2381732789fc5de83b45675e882f66623b7d8cb4f643017018d"
-dependencies = [
- "anstream",
- "anstyle",
- "env_filter",
- "log",
 ]
 
 [[package]]
@@ -1968,15 +1901,23 @@ name = "integration_tests"
 version = "0.1.0"
 dependencies = [
  "borsh 0.10.3",
- "litesvm",
+ "jito-bytemuck",
+ "jito-restaking-core",
+ "jito-restaking-program",
+ "jito-restaking-sdk",
+ "jito-vault-core",
+ "jito-vault-program",
+ "jito-vault-sdk",
+ "resolver-core",
  "resolver-program",
  "resolver-sdk",
  "solana-program",
  "solana-program-test",
  "solana-sdk",
+ "spl-associated-token-account",
  "spl-token",
  "spl-token-2022 3.0.4",
- "test-log",
+ "thiserror",
  "tokio",
 ]
 
@@ -1987,25 +1928,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
 
 [[package]]
-name = "is_terminal_polyfill"
-version = "1.70.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
-
-[[package]]
 name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -2019,7 +1945,7 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 [[package]]
 name = "jito-account-traits-derive"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2029,7 +1955,7 @@ dependencies = [
 [[package]]
 name = "jito-bytemuck"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "bytemuck",
@@ -2040,7 +1966,7 @@ dependencies = [
 [[package]]
 name = "jito-jsm-core"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "bytemuck",
@@ -2056,7 +1982,7 @@ dependencies = [
 [[package]]
 name = "jito-restaking-core"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "bytemuck",
@@ -2071,9 +1997,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "jito-restaking-program"
+version = "0.0.2"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
+dependencies = [
+ "borsh 0.10.3",
+ "cfg-if",
+ "const_str_to_pubkey",
+ "jito-bytemuck",
+ "jito-jsm-core",
+ "jito-restaking-core",
+ "jito-restaking-sdk",
+ "jito-vault-core",
+ "shank",
+ "solana-program",
+ "solana-security-txt",
+ "spl-associated-token-account",
+ "spl-token",
+ "spl-token-2022 3.0.4",
+ "thiserror",
+]
+
+[[package]]
 name = "jito-restaking-sdk"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "shank",
@@ -2084,7 +2032,7 @@ dependencies = [
 [[package]]
 name = "jito-vault-core"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "bytemuck",
@@ -2100,9 +2048,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "jito-vault-program"
+version = "0.0.2"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
+dependencies = [
+ "borsh 0.10.3",
+ "cfg-if",
+ "const_str_to_pubkey",
+ "jito-bytemuck",
+ "jito-jsm-core",
+ "jito-restaking-core",
+ "jito-vault-core",
+ "jito-vault-sdk",
+ "shank",
+ "solana-program",
+ "solana-security-txt",
+ "spl-associated-token-account",
+ "spl-token",
+ "spl-token-2022 3.0.4",
+ "thiserror",
+]
+
+[[package]]
 name = "jito-vault-sdk"
 version = "0.0.2"
-source = "git+https://github.com/jito-foundation/restaking.git#4af6d947d5ca8506961024317e217cfc9b6461b4"
+source = "git+https://github.com/jito-foundation/restaking.git#743a649d2b1e314b0aaec705dba8ce947ba49301"
 dependencies = [
  "borsh 0.10.3",
  "shank",
@@ -2243,27 +2213,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78b3ae25bc7c8c38cec158d1f2757ee79e9b3740fbc7ccf0e59e4b08d793fa89"
 
 [[package]]
-name = "litesvm"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0963e4df461a414763f0348b73eb284a734534a53558fcae35f984a0c16a6e6c"
-dependencies = [
- "bincode",
- "indexmap 2.3.0",
- "itertools 0.12.1",
- "log",
- "solana-address-lookup-table-program",
- "solana-bpf-loader-program",
- "solana-compute-budget-program",
- "solana-loader-v4-program",
- "solana-program",
- "solana-program-runtime",
- "solana-sdk",
- "solana-system-program",
- "thiserror",
-]
-
-[[package]]
 name = "lock_api"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2306,15 +2255,6 @@ checksum = "109de74d5d2353660401699a4174a4ff23fcc649caf553df71933c7fb45ad868"
 dependencies = [
  "cc",
  "libc",
-]
-
-[[package]]
-name = "matchers"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
-dependencies = [
- "regex-automata 0.1.10",
 ]
 
 [[package]]
@@ -2480,16 +2420,6 @@ name = "normalize-line-endings"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
-
-[[package]]
-name = "nu-ansi-term"
-version = "0.46.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
-dependencies = [
- "overload",
- "winapi",
-]
 
 [[package]]
 name = "num"
@@ -2748,12 +2678,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "overload"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
-
-[[package]]
 name = "parking_lot"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2920,7 +2844,7 @@ checksum = "59230a63c37f3e18569bdb90e4a89cbf5bf8b06fea0b84e65ea10cc4df47addd"
 dependencies = [
  "difflib",
  "float-cmp",
- "itertools 0.10.5",
+ "itertools",
  "normalize-line-endings",
  "predicates-core",
  "regex",
@@ -3209,17 +3133,8 @@ checksum = "4219d74c6b67a3654a9fbebc4b419e22126d13d2f3c4a07ee0cb61ff79a79619"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.7",
- "regex-syntax 0.8.4",
-]
-
-[[package]]
-name = "regex-automata"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
-dependencies = [
- "regex-syntax 0.6.29",
+ "regex-automata",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -3230,14 +3145,8 @@ checksum = "38caf58cc5ef2fed281f89292ef23f6365465ed9a41b7a7754eb4e26496c92df"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.8.4",
+ "regex-syntax",
 ]
-
-[[package]]
-name = "regex-syntax"
-version = "0.6.29"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
@@ -3289,10 +3198,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "resolver-core"
+version = "0.0.1"
+dependencies = [
+ "borsh 0.10.3",
+ "bytemuck",
+ "jito-bytemuck",
+ "jito-jsm-core",
+ "jito-restaking-core",
+ "jito-restaking-sdk",
+ "jito-vault-core",
+ "jito-vault-sdk",
+ "shank",
+ "solana-program",
+]
+
+[[package]]
 name = "resolver-program"
 version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
+ "jito-bytemuck",
+ "jito-jsm-core",
+ "resolver-core",
  "resolver-sdk",
  "solana-program",
  "spl-token",
@@ -3305,22 +3233,7 @@ version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
  "solana-program",
-]
-
-[[package]]
-name = "resolver_core"
-version = "0.1.0"
-dependencies = [
- "borsh 0.10.3",
- "bytemuck",
- "jito-bytemuck",
- "jito-jsm-core",
- "jito-restaking-core",
- "jito-restaking-sdk",
- "jito-vault-core",
- "jito-vault-sdk",
- "shank",
- "solana-program",
+ "thiserror",
 ]
 
 [[package]]
@@ -3857,7 +3770,7 @@ dependencies = [
  "fnv",
  "im",
  "index_list",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "log",
  "lz4",
@@ -4181,7 +4094,7 @@ version = "1.18.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10948c30d138d6fbfc2ae78a4882be5a9ebffa4bb1239c4efc386104ebc35b7f"
 dependencies = [
- "env_logger 0.9.3",
+ "env_logger",
  "lazy_static",
  "log",
 ]
@@ -4293,7 +4206,7 @@ dependencies = [
  "console_log",
  "curve25519-dalek",
  "getrandom 0.2.15",
- "itertools 0.10.5",
+ "itertools",
  "js-sys",
  "lazy_static",
  "libc",
@@ -4333,7 +4246,7 @@ dependencies = [
  "bincode",
  "eager",
  "enum-iterator",
- "itertools 0.10.5",
+ "itertools",
  "libc",
  "log",
  "num-derive 0.4.2",
@@ -4415,7 +4328,7 @@ dependencies = [
  "async-mutex",
  "async-trait",
  "futures",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "log",
  "quinn",
@@ -4545,7 +4458,7 @@ dependencies = [
  "fnv",
  "im",
  "index_list",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "log",
  "lru",
@@ -4621,7 +4534,7 @@ dependencies = [
  "ed25519-dalek-bip32",
  "generic-array",
  "hmac 0.12.1",
- "itertools 0.10.5",
+ "itertools",
  "js-sys",
  "lazy_static",
  "libsecp256k1",
@@ -4717,7 +4630,7 @@ dependencies = [
  "futures-util",
  "histogram",
  "indexmap 2.3.0",
- "itertools 0.10.5",
+ "itertools",
  "libc",
  "log",
  "nix",
@@ -4854,7 +4767,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f54cb2827041a2acb79e3855e7310466d9bef71650e2304994076b209eaf4d9f"
 dependencies = [
  "crossbeam-channel",
- "itertools 0.10.5",
+ "itertools",
  "log",
  "rustc_version",
  "serde",
@@ -4915,7 +4828,7 @@ dependencies = [
  "byteorder",
  "curve25519-dalek",
  "getrandom 0.1.16",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "merlin",
  "num-derive 0.4.2",
@@ -5585,28 +5498,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "test-log"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dffced63c2b5c7be278154d76b479f9f9920ed34e7574201407f0b14e2bbb93"
-dependencies = [
- "env_logger 0.11.5",
- "test-log-macros",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "test-log-macros"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5999e24eaa32083191ba4e425deb75cdf25efefabe5aaccb7446dd0d4122a3f5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.72",
-]
-
-[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5902,17 +5793,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracing-log"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
-dependencies = [
- "log",
- "once_cell",
- "tracing-core",
-]
-
-[[package]]
 name = "tracing-opentelemetry"
 version = "0.17.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5931,15 +5811,9 @@ version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
 dependencies = [
- "matchers",
- "nu-ansi-term",
- "once_cell",
- "regex",
  "sharded-slab",
  "thread_local",
- "tracing",
  "tracing-core",
- "tracing-log",
 ]
 
 [[package]]
@@ -6065,12 +5939,6 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
-
-[[package]]
-name = "utf8parse"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "valuable"
@@ -6240,7 +6108,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
