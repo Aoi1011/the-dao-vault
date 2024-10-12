@@ -1,17 +1,18 @@
 mod execute_instant_slash;
 mod execute_slash;
 mod initialize_config;
+mod initialize_resolver;
 mod request_slash;
-mod set_resolver;
 mod veto_slash;
 
 use borsh::BorshDeserialize;
-use create_token_metadata::process_create_token_metadata;
 use resolver_sdk::instruction::VaultInstruction;
 use solana_program::{
     account_info::AccountInfo, declare_id, entrypoint::ProgramResult, msg,
     program_error::ProgramError, pubkey::Pubkey,
 };
+
+use crate::initialize_config::process_initialize_config;
 
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
 
@@ -30,9 +31,9 @@ pub fn process_instruction(
     let instruction = VaultInstruction::try_from_slice(instruction_data)?;
 
     match instruction {
-        VaultInstruction::CreateTokenMetadata { name, symbol, uri } => {
-            msg!("Instruction: CreateTokenMetadata");
-            process_create_token_metadata(program_id, accounts, name, symbol, uri)?;
+        VaultInstruction::InitializeConfig => {
+            msg!("Instruction: InitializeConfig");
+            process_initialize_config(program_id, accounts)?;
         }
     }
 

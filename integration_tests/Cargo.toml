@@ -7,13 +7,21 @@ edition = "2021"
 
 [dev-dependencies]
 borsh = { workspace = true }
-litesvm = "0.1.0"
+jito-bytemuck = { workspace = true }
+jito-restaking-core = { workspace = true }
+jito-restaking-sdk = { workspace = true }
+jito-restaking-program = { workspace = true }
+jito-vault-core = { workspace = true }
+jito-vault-sdk = { workspace = true }
+jito-vault-program = { workspace = true }
+resolver-core = { workspace = true }
 resolver-program = { workspace = true }
 resolver-sdk = { workspace = true }
 solana-program = { workspace = true }
 solana-program-test = { workspace = true }
 solana-sdk = { workspace = true }
+spl-associated-token-account = { workspace = true }
 spl-token = { workspace = true }
 spl-token-2022 = { workspace = true }
-test-log = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true }

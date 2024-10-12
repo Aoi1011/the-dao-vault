@@ -16,21 +16,22 @@ jito-account-traits-derive = { git = "https://github.com/jito-foundation/restaki
 jito-jsm-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-restaking-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-restaking-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-restaking-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
+jito-restaking-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", features = ["no-entrypoint"] }
 jito-restaking-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-vault-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-vault-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-vault-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
+jito-vault-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", features = ["no-entrypoint"] }
 jito-vault-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-resolver-core = { path = "resolver_core", version = "=0.0.1" }
-resolver-program = { path = "resolver_program", version = "=0.0.1" }
-resolver-sdk = { path = "resolver_sdk", version = "=0.0.1" }
+resolver-core = { path = "resolver_core", version = "0.0.1" }
+resolver-program = { path = "resolver_program", version = "0.0.1" }
+resolver-sdk = { path = "resolver_sdk", version = "0.0.1" }
 shank = "0.4.2"
 shank_idl = "0.4.2"
 solana-sdk = "~1.18"
 solana-program = "~1.18"
 solana-program-test = "~1.18"
+spl-associated-token-account = { version = "2.2.0", features = ["no-entrypoint"] }
 spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
 spl-token-2022 = { version = "3.0.4", features = ["no-entrypoint"] }
-test-log = "0.2.16"
-tokio = { version = "1.36.0", features = ["full"] }
+thiserror = "1.0.57"
+tokio = { version = "1.36.0", features = ["macros"] }

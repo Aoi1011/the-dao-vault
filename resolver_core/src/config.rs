@@ -1,7 +1,10 @@
 use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
 use shank::ShankAccount;
-use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
+use solana_program::{
+    account_info::AccountInfo, epoch_schedule::DEFAULT_SLOTS_PER_EPOCH, msg,
+    program_error::ProgramError, pubkey::Pubkey,
+};
 
 /// The global configuration account for the resolver program. Manages
 /// program-wide settings and state.
@@ -32,6 +35,22 @@ impl Discriminator for Config {
 }
 
 impl Config {
+    pub fn new(
+        admin: Pubkey,
+        jito_restaking_program: Pubkey,
+        jito_vault_program: Pubkey,
+        bump: u8,
+    ) -> Self {
+        Self {
+            admin,
+            jito_restaking_program,
+            jito_vault_program,
+            epoch_length: PodU64::from(DEFAULT_SLOTS_PER_EPOCH),
+            bump,
+            reserved: [0; 263],
+        }
+    }
+
     /// Returns the seeds for the PDA
     pub fn seeds() -> Vec<Vec<u8>> {
         vec![b"config".to_vec()]

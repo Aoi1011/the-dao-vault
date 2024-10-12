@@ -16,6 +16,9 @@ default = []
 
 [dependencies]
 borsh = { workspace = true }
+jito-bytemuck = { workspace = true }
+jito-jsm-core = { workspace = true }
+resolver-core = { workspace = true }
 resolver-sdk = { workspace = true }
 solana-program = { workspace = true }
 spl-token = { workspace = true }

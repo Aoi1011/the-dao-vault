@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 borsh = { workspace = true }
 solana-program = { workspace = true }
+thiserror = { workspace = true }
