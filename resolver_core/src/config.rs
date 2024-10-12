@@ -21,7 +21,7 @@ pub struct Config {
     pub jito_vault_program: Pubkey,
 
     /// The length of an epoch in slots
-    pub epoch_length: PodU64,
+    epoch_length: PodU64,
 
     /// The bump seed for the PDA
     pub bump: u8,
@@ -49,6 +49,10 @@ impl Config {
             bump,
             reserved: [0; 263],
         }
+    }
+
+    pub fn epoch_length(&self) -> u64 {
+        self.epoch_length.into()
     }
 
     /// Returns the seeds for the PDA

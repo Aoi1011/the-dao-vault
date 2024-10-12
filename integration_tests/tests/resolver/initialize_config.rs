@@ -1,9 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use borsh::BorshDeserialize;
     use resolver_core::config::Config;
-    use solana_program_test::{processor, ProgramTest};
-    use solana_sdk::{signature::Keypair, signer::Signer, transaction::Transaction};
+    use solana_program::epoch_schedule::DEFAULT_SLOTS_PER_EPOCH;
+    use solana_sdk::{signature::Keypair, signer::Signer};
 
     use crate::fixtures::fixture::TestBuilder;
 
@@ -28,9 +27,8 @@ mod tests {
 
         let config = resolver_program_client.get_config(&config).await.unwrap();
         assert_eq!(config.admin, config_admin.pubkey());
-        // assert_eq!(config.jito_vault_program, jito_vault_program::id());
-        // assert_eq!(config.ncn_count(), 0);
-        // assert_eq!(config.operator_count(), 0);
-        // assert_eq!(config.epoch_length(), DEFAULT_SLOTS_PER_EPOCH);
+        assert_eq!(config.jito_restaking_program, jito_restaking_program::id());
+        assert_eq!(config.jito_vault_program, jito_vault_program::id());
+        assert_eq!(config.epoch_length(), DEFAULT_SLOTS_PER_EPOCH);
     }
 }
