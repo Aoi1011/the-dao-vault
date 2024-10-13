@@ -3209,6 +3209,7 @@ dependencies = [
  "jito-restaking-sdk",
  "jito-vault-core",
  "jito-vault-sdk",
+ "resolver-sdk",
  "shank",
  "solana-program",
 ]

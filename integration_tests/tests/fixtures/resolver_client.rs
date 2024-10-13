@@ -244,6 +244,63 @@ impl ResolverProgramClient {
         .await
     }
 
+    pub async fn do_veto_slash(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        resolver: &Pubkey,
+        resolver_admin: &Keypair,
+    ) -> TestResult<()> {
+        let slash_proposal = SlashProposal::find_program_address(
+            &resolver_program::id(),
+            &ncn,
+            &operator,
+            &resolver,
+        )
+        .0;
+        let ncn_slash_proposal_ticket =
+            NcnSlashProposalTicket::find_program_address(&resolver_program::id(), ncn).0;
+
+        self.veto_slash(
+            ncn,
+            operator,
+            resolver,
+            &slash_proposal,
+            &ncn_slash_proposal_ticket,
+            resolver_admin,
+        )
+        .await
+    }
+
+    async fn veto_slash(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        resolver: &Pubkey,
+        slash_proposal: &Pubkey,
+        ncn_slash_proposal_ticket: &Pubkey,
+        resolver_admin: &Keypair,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::veto_slash(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                ncn,
+                operator,
+                resolver,
+                slash_proposal,
+                ncn_slash_proposal_ticket,
+                &resolver_admin.pubkey(),
+            )],
+            Some(&resolver_admin.pubkey()),
+            &[resolver_admin],
+            blockhash,
+        ))
+        .await
+    }
+
     pub async fn process_transaction(&mut self, tx: &Transaction) -> TestResult<()> {
         self.banks_client
             .process_transaction_with_preflight_and_commitment(

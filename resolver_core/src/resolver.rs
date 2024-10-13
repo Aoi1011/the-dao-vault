@@ -1,5 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
+use resolver_sdk::error::ResolverError;
 use shank::{ShankAccount, ShankType};
 use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
 
@@ -35,6 +36,15 @@ impl Resolver {
 
     pub fn index(&self) -> u64 {
         self.index.into()
+    }
+
+    pub fn check_admin(&self, candidate_resolver_admin: &Pubkey) -> Result<(), ResolverError> {
+        if self.admin.ne(candidate_resolver_admin) {
+            msg!("Resolver admin is incorrect");
+            return Err(ResolverError::ResolverAdminInvalid);
+        }
+
+        Ok(())
     }
 
     pub fn seeds(base: &Pubkey) -> Vec<Vec<u8>> {
