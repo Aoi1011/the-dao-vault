@@ -17,6 +17,7 @@ use crate::{
     initialize_config::process_initialize_config,
     initialize_ncn_resolver_program_config::process_initialize_resolver_program_config,
     initialize_resolver::process_initialize_resolver, propose_slash::process_propose_slash,
+    veto_slash::process_veto_slash,
 };
 
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
@@ -54,6 +55,11 @@ pub fn process_instruction(
         ResolverInstruction::ProposeSlash { slash_amount } => {
             msg!("Instruction: ProposeSlash");
             process_propose_slash(program_id, accounts, slash_amount)?;
+        }
+
+        ResolverInstruction::VetoSlash => {
+            msg!("Instruction: VetoSlash");
+            process_veto_slash(program_id, accounts)?;
         }
     }
 

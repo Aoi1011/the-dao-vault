@@ -118,3 +118,32 @@ pub fn propose_slash(
             .unwrap(),
     }
 }
+
+#[allow(clippy::too_many_arguments)]
+pub fn veto_slash(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    operator: &Pubkey,
+    resolver: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+    resolver_admin: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new_readonly(*resolver, false),
+        AccountMeta::new(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new(*resolver_admin, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::VetoSlash.try_to_vec().unwrap(),
+    }
+}

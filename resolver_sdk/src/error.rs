@@ -3,6 +3,14 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ResolverError {
+    #[error("ResolverAdminInvalid")]
+    ResolverAdminInvalid,
+
+    #[error("SlashProposalVetoPeriodEnded")]
+    SlashProposalVetoPeriodEnded,
+    #[error("SlashProposalCompleted")]
+    SlashProposalCompleted,
+
     #[error("ArithmeticOverflow")]
     ArithmeticOverflow = 3000,
     #[error("ArithmeticUnderflow")]

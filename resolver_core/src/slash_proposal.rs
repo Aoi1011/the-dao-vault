@@ -1,5 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
+use resolver_sdk::error::ResolverError;
 use shank::ShankAccount;
 use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
 
@@ -19,7 +20,7 @@ pub struct SlashProposal {
 
     pub capture_slot: PodU64,
 
-    pub veto_deadline_slot: PodU64,
+    veto_deadline_slot: PodU64,
 
     pub completed: u8,
 
@@ -71,6 +72,28 @@ impl SlashProposal {
 
     pub fn amount(&self) -> u64 {
         self.amount.into()
+    }
+
+    pub fn veto_deadline_slot(&self) -> u64 {
+        self.veto_deadline_slot.into()
+    }
+
+    pub fn check_veto_deadline_slot(&self, current_slot: u64) -> Result<(), ResolverError> {
+        if self.veto_deadline_slot() <= current_slot {
+            msg!("Veto period ended");
+            return Err(ResolverError::SlashProposalVetoPeriodEnded);
+        }
+
+        Ok(())
+    }
+
+    pub fn check_completed(&self) -> Result<(), ResolverError> {
+        if self.completed.eq(&1_u8) {
+            msg!("Slash proposal completed");
+            return Err(ResolverError::SlashProposalCompleted);
+        }
+
+        Ok(())
     }
 
     pub fn seeds(ncn: &Pubkey, operator: &Pubkey, resolver: &Pubkey) -> Vec<Vec<u8>> {
