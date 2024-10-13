@@ -8,11 +8,15 @@ members = [
 
 resolver = "2"
 
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+
 [workspace.dependencies]
 borsh = { version = "0.10.3" }
 bytemuck = { version = "1.16.3", features = ["min_const_generics"] }
-jito-bytemuck = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-account-traits-derive = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
+jito-bytemuck = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-jsm-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-restaking-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-restaking-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }

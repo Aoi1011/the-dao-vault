@@ -19,6 +19,7 @@ pub enum TestError {
 }
 
 impl TestError {
+    #[allow(dead_code)]
     pub fn to_transaction_error(&self) -> Option<TransactionError> {
         match self {
             TestError::BanksClientError(e) => match e {
@@ -31,6 +32,7 @@ impl TestError {
     }
 }
 
+#[allow(dead_code)]
 #[inline(always)]
 #[track_caller]
 pub fn assert_ix_error<T>(test_error: Result<T, TestError>, ix_error: InstructionError) {

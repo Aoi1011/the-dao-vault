@@ -12,6 +12,33 @@ mod tests {
         let fixture = TestBuilder::new().await;
         let mut restaking_program_client = fixture.restaking_program_client();
         let mut resolver_program_client = fixture.resolver_program_client();
+        let mut vault_program_client = fixture.vault_program_client();
+
+        // let deposit_fee_bps = 0;
+        // let withdrawal_fee_bps = 0;
+        // let reward_fee_bps = 0;
+        // let num_operators = 1;
+        // let slasher_amounts = vec![MAX_SLASH_AMOUNT];
+
+        // let ConfiguredVault {
+        //     mut vault_program_client,
+        //     mut restaking_program_client,
+        //     vault_config_admin: _,
+        //     vault_root: _,
+        //     ncn_root: _,
+        //     operator_roots: _,
+        //     slashers_amounts: _,
+        //     ..
+        // } = fixture
+        //     .setup_vault_with_ncn_and_operators(
+        //         deposit_fee_bps,
+        //         withdrawal_fee_bps,
+        //         reward_fee_bps,
+        //         num_operators,
+        //         &slasher_amounts,
+        //     )
+        //     .await
+        //     .unwrap();
 
         restaking_program_client
             .do_initialize_config()
@@ -23,7 +50,7 @@ mod tests {
             .await
             .unwrap();
 
-        let mut vault_program_client = fixture.vault_program_client();
+        // let mut vault_program_client = fixture.vault_program_client();
         let (_vault_config_admin, vault_root) = vault_program_client
             .setup_config_and_vault(0, 0, 0)
             .await
