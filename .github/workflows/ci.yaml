@@ -36,10 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aarcangeli/load-dotenv@v1.0.0
-        with:
-          path: config
-          filenames: program.env
+        # - uses: aarcangeli/load-dotenv@v1.0.0
+        #   with:
+        #     path: config
+        #     filenames: program.env
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: install solana toolsuite
         run: sh -c "$(curl -sSfL https://release.solana.com/v1.18.22/install)"
@@ -63,10 +63,10 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v4
-      - uses: aarcangeli/load-dotenv@v1.0.0
-        with:
-          path: config
-          filenames: program.env
+        # - uses: aarcangeli/load-dotenv@v1.0.0
+        #   with:
+        #     path: config
+        #     filenames: program.env
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Download resolver program
         uses: actions/download-artifact@v4
