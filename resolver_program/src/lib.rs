@@ -1,9 +1,9 @@
 mod execute_instant_slash;
 mod execute_slash;
 mod initialize_config;
+mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
-mod initialize_slash_request_list;
-mod request_slash;
+mod propose_slash;
 mod veto_slash;
 
 use borsh::BorshDeserialize;
@@ -14,8 +14,9 @@ use solana_program::{
 };
 
 use crate::{
-    initialize_config::process_initialize_config, initialize_resolver::process_initialize_resolver,
-    initialize_slash_request_list::process_initialize_slash_request,
+    initialize_config::process_initialize_config,
+    initialize_ncn_resolver_program_config::process_initialize_resolver_program_config,
+    initialize_resolver::process_initialize_resolver, propose_slash::process_propose_slash,
 };
 
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
@@ -40,14 +41,19 @@ pub fn process_instruction(
             process_initialize_config(program_id, accounts)?;
         }
 
+        ResolverInstruction::InitializeNcnResolverProgramConfig { veto_duration } => {
+            msg!("Instruction: InitializeNcnResolverProgramConfig");
+            process_initialize_resolver_program_config(program_id, accounts, veto_duration)?;
+        }
+
         ResolverInstruction::InitializeResolver => {
             msg!("Instruction: InitializeResolver");
             process_initialize_resolver(program_id, accounts)?;
         }
 
-        ResolverInstruction::InitializeSlashRequestList => {
-            msg!("Instruction: InitializeSlashRequestList");
-            process_initialize_slash_request(program_id, accounts)?;
+        ResolverInstruction::ProposeSlash { slash_amount } => {
+            msg!("Instruction: ProposeSlash");
+            process_propose_slash(program_id, accounts, slash_amount)?;
         }
     }
 

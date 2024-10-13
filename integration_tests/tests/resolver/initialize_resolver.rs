@@ -1,9 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use resolver_core::resolver::Resolver;
+    use resolver_core::{
+        config::Config, ncn_resolver_program_config::NcnResolverProgramConfig, resolver::Resolver,
+    };
     use solana_sdk::{signature::Keypair, signer::Signer};
 
-    use crate::fixtures::fixture::TestBuilder;
+    use crate::{fixtures::fixture::TestBuilder, resolver::VETO_DURATION};
 
     #[tokio::test]
     async fn test_initialize_resolver_ok() {
@@ -48,17 +50,20 @@ mod tests {
             .await
             .unwrap();
 
-        let ticket = restaking_program_client
-            .get_ncn_vault_slasher_ticket(
+        resolver_program_client
+            .do_initialize_ncn_resolver_program_config(
+                &Config::find_program_address(&resolver_program::id()).0,
                 &ncn_root.ncn_pubkey,
-                &vault_root.vault_pubkey,
-                &slasher.pubkey(),
+                &ncn_root.ncn_admin,
+                VETO_DURATION,
             )
             .await
             .unwrap();
 
+        let resolver = Keypair::new();
+        let resolver_pubkey = resolver.pubkey();
         let resolver_root = resolver_program_client
-            .do_initialize_resolver(&slasher, &ncn_root.ncn_pubkey, &vault_root.vault_pubkey)
+            .do_initialize_resolver(&ncn_root, &resolver.pubkey())
             .await
             .unwrap();
 
@@ -67,7 +72,20 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(resolver.admin, slasher.pubkey());
-        assert_eq!(resolver.index(), ticket.index());
+        assert_eq!(resolver.admin, resolver_pubkey);
+        assert_eq!(resolver.index(), 0);
+
+        let ncn_resolver_program_config: NcnResolverProgramConfig = resolver_program_client
+            .get_account(
+                &NcnResolverProgramConfig::find_program_address(
+                    &resolver_program::id(),
+                    &ncn_root.ncn_pubkey,
+                )
+                .0,
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(ncn_resolver_program_config.resolver_count(), 1);
     }
 }
