@@ -3,9 +3,10 @@ use jito_jsm_core::{
     create_account,
     loader::{load_signer, load_system_account, load_system_program},
 };
-use jito_restaking_core::{ncn::Ncn, ncn_vault_slasher_ticket::NcnVaultSlasherTicket};
-use jito_vault_core::vault::Vault;
-use resolver_core::{config::Config, resolver::Resolver};
+use jito_restaking_core::ncn::Ncn;
+use resolver_core::{
+    config::Config, ncn_resolver_program_config::NcnResolverProgramConfig, resolver::Resolver,
+};
 use resolver_sdk::error::ResolverError;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program_error::ProgramError,
@@ -13,7 +14,7 @@ use solana_program::{
 };
 
 pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
-    let [config, resolver, admin, base, ncn, vault, ncn_vault_slasher_ticket, system_program] =
+    let [config, ncn_resolver_program_config, ncn, resolver_info, base, ncn_slasher_admin, payer, resolver_admin, system_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -23,37 +24,32 @@ pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]
     let config_data = config.data.borrow();
     let config = Config::try_from_slice_unchecked(&config_data)?;
 
-    load_system_account(resolver, true)?;
-    load_signer(admin, true)?;
-    load_signer(base, false)?;
-    Ncn::load(&config.jito_restaking_program, ncn, false)?;
-    Vault::load(&config.jito_vault_program, vault, false)?;
-
-    NcnVaultSlasherTicket::load(
-        &config.jito_restaking_program,
-        ncn_vault_slasher_ticket,
-        ncn,
-        vault,
-        admin,
-        false,
+    NcnResolverProgramConfig::load(program_id, ncn_resolver_program_config, ncn, true)?;
+    let mut ncn_resolver_program_config_data = ncn_resolver_program_config.data.borrow_mut();
+    let ncn_resolver_program_config = NcnResolverProgramConfig::try_from_slice_unchecked_mut(
+        &mut ncn_resolver_program_config_data,
     )?;
-    let ncn_vault_slasher_ticket_data = ncn_vault_slasher_ticket.data.borrow();
-    let ncn_vault_slasher_ticket =
-        NcnVaultSlasherTicket::try_from_slice_unchecked(&ncn_vault_slasher_ticket_data)?;
+
+    Ncn::load(&config.jito_restaking_program, ncn, false)?;
+    load_system_account(resolver_info, true)?;
+    load_signer(base, false)?;
+    load_signer(ncn_slasher_admin, true)?;
+    load_signer(payer, true)?;
+
     load_system_program(system_program)?;
 
     let (resolver_pubkey, resolver_bump, mut resolver_seed) =
-        Resolver::find_program_address(program_id, &base.key);
+        Resolver::find_program_address(program_id, base.key);
     resolver_seed.push(vec![resolver_bump]);
-    if resolver.key.ne(&resolver_pubkey) {
+    if resolver_info.key.ne(&resolver_pubkey) {
         msg!("Resolver account is not at the correct PDA");
         return Err(ProgramError::InvalidAccountData);
     }
 
-    msg!("Initializing resolver at address: {}", resolver.key);
+    msg!("Initializing resolver at address: {}", resolver_info.key);
     create_account(
-        admin,
-        resolver,
+        payer,
+        resolver_info,
         system_program,
         program_id,
         &Rent::get()?,
@@ -63,16 +59,18 @@ pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]
         &resolver_seed,
     )?;
 
-    let mut resolver_data = resolver.try_borrow_mut_data()?;
+    let mut resolver_data = resolver_info.try_borrow_mut_data()?;
     resolver_data[0] = Resolver::DISCRIMINATOR;
     let resolver = Resolver::try_from_slice_unchecked_mut(&mut resolver_data)?;
 
     *resolver = Resolver::new(
         *base.key,
-        *admin.key,
-        ncn_vault_slasher_ticket.index(),
+        *resolver_admin.key,
+        ncn_resolver_program_config.resolver_count(),
         resolver_bump,
     );
+
+    ncn_resolver_program_config.increment_resolver_count();
 
     Ok(())
 }

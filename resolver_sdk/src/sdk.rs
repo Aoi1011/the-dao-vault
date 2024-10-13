@@ -29,25 +29,52 @@ pub fn initialize_config(
     }
 }
 
+pub fn initialize_ncn_resolver_program_config(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    ncn_resolver_program_config: &Pubkey,
+    admin: &Pubkey,
+    veto_duration: u64,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new(*ncn_resolver_program_config, false),
+        AccountMeta::new(*admin, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::InitializeNcnResolverProgramConfig { veto_duration }
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn initialize_resolver(
     program_id: &Pubkey,
     config: &Pubkey,
-    resolver: &Pubkey,
-    admin: &Pubkey,
-    base: &Pubkey,
+    ncn_resolver_program_config: &Pubkey,
     ncn: &Pubkey,
-    vault: &Pubkey,
-    ncn_vault_slasher_ticket: &Pubkey,
+    resolver: &Pubkey,
+    base: &Pubkey,
+    ncn_slasher_admin: &Pubkey,
+    payer: &Pubkey,
+    resolver_admin: &Pubkey,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
-        AccountMeta::new(*resolver, false),
-        AccountMeta::new(*admin, true),
-        AccountMeta::new(*base, true),
+        AccountMeta::new(*ncn_resolver_program_config, false),
         AccountMeta::new_readonly(*ncn, false),
-        AccountMeta::new_readonly(*vault, false),
-        AccountMeta::new_readonly(*ncn_vault_slasher_ticket, false),
+        AccountMeta::new(*resolver, false),
+        AccountMeta::new(*base, true),
+        AccountMeta::new(*ncn_slasher_admin, true),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(*resolver_admin, false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 
@@ -60,25 +87,33 @@ pub fn initialize_resolver(
     }
 }
 
-pub fn initialize_slash_request_list(
+#[allow(clippy::too_many_arguments)]
+pub fn propose_slash(
     program_id: &Pubkey,
     config: &Pubkey,
-    slash_request_list: &Pubkey,
-    admin: &Pubkey,
     ncn: &Pubkey,
+    operator: &Pubkey,
+    resolver: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+    slasher_admin: &Pubkey,
+    slash_amount: u64,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
-        AccountMeta::new(*slash_request_list, false),
-        AccountMeta::new(*admin, true),
         AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new_readonly(*resolver, false),
+        AccountMeta::new(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new(*slasher_admin, true),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 
     Instruction {
         program_id: *program_id,
         accounts,
-        data: ResolverInstruction::InitializeSlashRequestList
+        data: ResolverInstruction::ProposeSlash { slash_amount }
             .try_to_vec()
             .unwrap(),
     }

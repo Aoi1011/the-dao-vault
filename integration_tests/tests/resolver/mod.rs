@@ -1,3 +1,7 @@
 mod initialize_config;
+mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
-mod initialize_slash_request_list;
+mod propose_slash;
+
+pub const MAX_SLASH_AMOUNT: u64 = 100;
+pub const VETO_DURATION: u64 = 100;
