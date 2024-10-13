@@ -1500,68 +1500,6 @@ impl VaultProgramClient {
         .await
     }
 
-    #[allow(dead_code)]
-    pub async fn create_token_metadata(
-        &mut self,
-        vault: &Pubkey,
-        admin: &Keypair,
-        vrt_mint: &Pubkey,
-        payer: &Keypair,
-        metadata: &Pubkey,
-        name: String,
-        symbol: String,
-        uri: String,
-    ) -> Result<(), TestError> {
-        let blockhash = self.banks_client.get_latest_blockhash().await?;
-        self._process_transaction(&Transaction::new_signed_with_payer(
-            &[jito_vault_sdk::sdk::create_token_metadata(
-                &jito_vault_program::id(),
-                vault,
-                &admin.pubkey(),
-                vrt_mint,
-                &payer.pubkey(),
-                metadata,
-                name,
-                symbol,
-                uri,
-            )],
-            Some(&payer.pubkey()),
-            &[admin, payer],
-            blockhash,
-        ))
-        .await
-    }
-
-    #[allow(dead_code)]
-    pub async fn update_token_metadata(
-        &mut self,
-        vault: &Pubkey,
-        admin: &Keypair,
-        vrt_mint: &Pubkey,
-        metadata: &Pubkey,
-        name: String,
-        symbol: String,
-        uri: String,
-    ) -> Result<(), TestError> {
-        let blockhash = self.banks_client.get_latest_blockhash().await?;
-        self._process_transaction(&Transaction::new_signed_with_payer(
-            &[jito_vault_sdk::sdk::update_token_metadata(
-                &jito_vault_program::id(),
-                vault,
-                &admin.pubkey(),
-                vrt_mint,
-                metadata,
-                name,
-                symbol,
-                uri,
-            )],
-            Some(&self.payer.pubkey()),
-            &[&self.payer, &admin],
-            blockhash,
-        ))
-        .await
-    }
-
     async fn _process_transaction(&mut self, tx: &Transaction) -> Result<(), TestError> {
         self.banks_client
             .process_transaction_with_preflight_and_commitment(

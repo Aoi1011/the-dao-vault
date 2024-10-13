@@ -25,6 +25,7 @@ impl std::fmt::Debug for TestBuilder {
 }
 
 pub struct ConfiguredVault {
+    #[allow(dead_code)]
     pub vault_program_client: VaultProgramClient,
     pub restaking_program_client: RestakingProgramClient,
     #[allow(dead_code)]
