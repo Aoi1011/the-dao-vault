@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt, clippy
+      - name: Install cargo-sort from crates.io
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-sort
+      - run: cargo sort --workspace --check
+      - run: cargo fmt --all --check
+      - run: cargo clippy
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aarcangeli/load-dotenv@v1.0.0
+        with:
+          path: config
+          filenames: program.env
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: install solana toolsuite
+        run: sh -c "$(curl -sSfL https://release.solana.com/v1.18.22/install)"
+      - name: add to path
+        run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      - name: Building programs
+        run: cargo-build-sbf
+        env:
+          RESOLVER_PROGRAM_ID: ${{ env.RESOLVER_PROGRAM_ID }}
+      - name: Upload resolver program
+        uses: actions/upload-artifact@v4
+        with:
+          name: resolver_program.so
+          path: target/sbf-solana-solana/release/resolver_program.so
+          if-no-files-found: error
+
+  test_sbf:
+    name: cargo test
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aarcangeli/load-dotenv@v1.0.0
+        with:
+          path: config
+          filenames: program.env
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Download resolver program
+        uses: actions/download-artifact@v4
+        with:
+          name: resolver_program.so
+          path: target/sbf-solana-solana/release/
+      - uses: taiki-e/install-action@nextest
+      - run: cargo nextest run --all-features
+        env:
+          SBF_OUT_DIR: ${{ github.workspace }}/target/sbf-solana-solana/release
