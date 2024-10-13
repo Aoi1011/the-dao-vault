@@ -1,6 +1,6 @@
 use jito_bytemuck::AccountDeserialize;
 use jito_restaking_core::ncn_vault_slasher_ticket::NcnVaultSlasherTicket;
-use resolver_core::{config::Config, resolver::Resolver};
+use resolver_core::{config::Config, resolver::Resolver, slash_request_list::SlashRequestList};
 use solana_program::{native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer};
 use solana_program_test::BanksClient;
 use solana_sdk::{
@@ -98,7 +98,7 @@ impl ResolverProgramClient {
         Ok(ResolverRoot { resolver_pubkey })
     }
 
-    pub async fn initialize_resolver(
+    async fn initialize_resolver(
         &mut self,
         resolver: &Pubkey,
         admin: &Keypair,
@@ -115,16 +115,6 @@ impl ResolverProgramClient {
         )
         .0;
 
-        println!(
-            "Config: {:?}",
-            Config::find_program_address(&resolver_program::id()).0
-        );
-        println!("resolver: {:?}", resolver);
-        println!("slasher: {:?}", admin.pubkey());
-        println!("ncn: {:?}", ncn);
-        println!("vault: {:?}", vault);
-        println!("ticket: {:?}", ncn_slasher_ticket);
-
         self.process_transaction(&Transaction::new_signed_with_payer(
             &[resolver_sdk::sdk::initialize_resolver(
                 &resolver_program::id(),
@@ -134,16 +124,46 @@ impl ResolverProgramClient {
                 &base.pubkey(),
                 ncn,
                 vault,
-                &ncn_slasher_ticket, // &NcnVaultSlasherTicket::find_program_address(
-                                     //     &jito_restaking_program::id(),
-                                     //     ncn,
-                                     //     vault,
-                                     //     &admin.pubkey(),
-                                     // )
-                                     // .0,
+                &ncn_slasher_ticket,
             )],
             Some(&admin.pubkey()),
             &[admin, base],
+            blockhash,
+        ))
+        .await
+    }
+
+    pub async fn do_initialize_slash_request_list(
+        &mut self,
+        admin: &Keypair,
+        ncn: &Pubkey,
+    ) -> TestResult<()> {
+        // create resolver + add operator vault
+        let slash_request_list_pubkey =
+            SlashRequestList::find_program_address(&resolver_program::id(), &ncn).0;
+
+        self.initialize_slash_request_list(&slash_request_list_pubkey, admin, ncn)
+            .await
+    }
+
+    async fn initialize_slash_request_list(
+        &mut self,
+        slash_request_list: &Pubkey,
+        admin: &Keypair,
+        ncn: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::initialize_slash_request_list(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                slash_request_list,
+                &admin.pubkey(),
+                ncn,
+            )],
+            Some(&admin.pubkey()),
+            &[admin],
             blockhash,
         ))
         .await

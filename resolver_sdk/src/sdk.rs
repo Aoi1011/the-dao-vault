@@ -5,7 +5,7 @@ use solana_program::{
     system_program,
 };
 
-use crate::instruction::VaultInstruction;
+use crate::instruction::ResolverInstruction;
 
 pub fn initialize_config(
     program_id: &Pubkey,
@@ -25,7 +25,7 @@ pub fn initialize_config(
     Instruction {
         program_id: *program_id,
         accounts,
-        data: VaultInstruction::InitializeConfig.try_to_vec().unwrap(),
+        data: ResolverInstruction::InitializeConfig.try_to_vec().unwrap(),
     }
 }
 
@@ -54,6 +54,32 @@ pub fn initialize_resolver(
     Instruction {
         program_id: *program_id,
         accounts,
-        data: VaultInstruction::InitializeResolver.try_to_vec().unwrap(),
+        data: ResolverInstruction::InitializeResolver
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn initialize_slash_request_list(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    slash_request_list: &Pubkey,
+    admin: &Pubkey,
+    ncn: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new(*slash_request_list, false),
+        AccountMeta::new(*admin, true),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::InitializeSlashRequestList
+            .try_to_vec()
+            .unwrap(),
     }
 }

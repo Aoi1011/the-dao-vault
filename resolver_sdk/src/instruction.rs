@@ -1,7 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
 #[derive(Debug, BorshSerialize, BorshDeserialize)]
-pub enum VaultInstruction {
+pub enum ResolverInstruction {
     InitializeConfig,
     InitializeResolver,
+    InitializeSlashRequestList,
 }
