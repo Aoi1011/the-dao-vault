@@ -60,6 +60,7 @@ impl Debug for VaultRoot {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct VaultStakerWithdrawalTicketRoot {
     pub base: Pubkey,
@@ -78,6 +79,7 @@ impl VaultProgramClient {
         }
     }
 
+    #[allow(dead_code)]
     pub async fn configure_depositor(
         &mut self,
         vault_root: &VaultRoot,
@@ -94,16 +96,19 @@ impl VaultProgramClient {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn get_config(&mut self, account: &Pubkey) -> Result<Config, TestError> {
         let account = self.banks_client.get_account(*account).await?.unwrap();
         Ok(Config::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault(&mut self, account: &Pubkey) -> Result<Vault, TestError> {
         let account = self.banks_client.get_account(*account).await?.unwrap();
         Ok(Vault::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_ncn_ticket(
         &mut self,
         vault: &Pubkey,
@@ -114,6 +119,7 @@ impl VaultProgramClient {
         Ok(VaultNcnTicket::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_operator_delegation(
         &mut self,
         vault: &Pubkey,
@@ -132,6 +138,7 @@ impl VaultProgramClient {
         )
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_staker_withdrawal_ticket(
         &mut self,
         vault: &Pubkey,
@@ -152,6 +159,7 @@ impl VaultProgramClient {
         Ok(withdrawal_ticket)
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_ncn_slasher_ticket(
         &mut self,
         vault: &Pubkey,
@@ -169,6 +177,7 @@ impl VaultProgramClient {
         Ok(VaultNcnSlasherTicket::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_ncn_slasher_operator_ticket(
         &mut self,
         vault: &Pubkey,
@@ -193,6 +202,7 @@ impl VaultProgramClient {
         )
     }
 
+    #[allow(dead_code)]
     pub async fn get_vault_update_state_tracker(
         &mut self,
         vault: &Pubkey,
@@ -208,6 +218,7 @@ impl VaultProgramClient {
         )
     }
 
+    #[allow(dead_code)]
     pub async fn get_token_metadata(
         &mut self,
         vrt_mint: &Pubkey,
@@ -348,6 +359,7 @@ impl VaultProgramClient {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn set_capacity(
         &mut self,
         config: &Pubkey,
@@ -422,6 +434,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn setup_vault_ncn_slasher_operator_ticket(
         &mut self,
         vault_root: &VaultRoot,
@@ -468,6 +481,7 @@ impl VaultProgramClient {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn do_slash(
         &mut self,
         vault_root: &VaultRoot,
@@ -688,6 +702,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn do_add_delegation(
         &mut self,
         vault_root: &VaultRoot,
@@ -807,6 +822,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn delegate_token_account(
         &mut self,
         config: &Pubkey,
@@ -836,6 +852,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn set_admin(
         &mut self,
         config: &Pubkey,
@@ -859,6 +876,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn set_secondary_admin(
         &mut self,
         config: &Pubkey,
@@ -884,6 +902,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn set_fees(
         &mut self,
         config: &Pubkey,
@@ -911,6 +930,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn do_enqueue_withdrawal(
         &mut self,
         vault_root: &VaultRoot,
@@ -951,6 +971,7 @@ impl VaultProgramClient {
         })
     }
 
+    #[allow(dead_code)]
     pub async fn do_cooldown_delegation(
         &mut self,
         vault_root: &VaultRoot,
@@ -1000,6 +1021,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn do_full_vault_update(
         &mut self,
         vault_pubkey: &Pubkey,
@@ -1047,6 +1069,7 @@ impl VaultProgramClient {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn do_crank_vault_update_state_tracker(
         &mut self,
         vault: &Pubkey,
@@ -1076,6 +1099,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn crank_vault_update_state_tracker(
         &mut self,
         vault: &Pubkey,
@@ -1205,6 +1229,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn do_burn_withdrawal_ticket(
         &mut self,
         vault_root: &VaultRoot,
@@ -1237,6 +1262,7 @@ impl VaultProgramClient {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn burn_withdrawal_ticket(
         &mut self,
         config: &Pubkey,
@@ -1299,6 +1325,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn do_mint_to(
         &mut self,
         vault_root: &VaultRoot,
@@ -1473,6 +1500,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn create_token_metadata(
         &mut self,
         vault: &Pubkey,
@@ -1504,6 +1532,7 @@ impl VaultProgramClient {
         .await
     }
 
+    #[allow(dead_code)]
     pub async fn update_token_metadata(
         &mut self,
         vault: &Pubkey,
@@ -1685,6 +1714,7 @@ impl VaultProgramClient {
             .await
     }
 
+    #[allow(dead_code)]
     pub async fn get_reward_fee_token_account(
         &mut self,
         vault: &Pubkey,
@@ -1704,6 +1734,7 @@ impl VaultProgramClient {
         Ok(SPLTokenAccount::unpack(&account.data).unwrap())
     }
 
+    #[allow(dead_code)]
     pub async fn create_and_fund_reward_vault(
         &mut self,
         vault: &Pubkey,
@@ -1749,6 +1780,7 @@ impl VaultProgramClient {
     }
 }
 
+#[allow(dead_code)]
 #[inline(always)]
 #[track_caller]
 pub fn assert_vault_error<T>(test_error: Result<T, TestError>, vault_error: VaultError) {

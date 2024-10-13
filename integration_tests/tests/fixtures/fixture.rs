@@ -27,11 +27,14 @@ impl std::fmt::Debug for TestBuilder {
 pub struct ConfiguredVault {
     pub vault_program_client: VaultProgramClient,
     pub restaking_program_client: RestakingProgramClient,
+    #[allow(dead_code)]
     pub vault_config_admin: Keypair,
     pub vault_root: VaultRoot,
+    #[allow(dead_code)]
     pub restaking_config_admin: Keypair,
     pub ncn_root: NcnRoot,
     pub operator_roots: Vec<OperatorRoot>,
+    #[allow(dead_code)]
     pub slashers_amounts: Vec<(Keypair, u64)>,
 }
 
@@ -100,13 +103,6 @@ impl TestBuilder {
         let clock: Clock = self.context.banks_client.get_sysvar().await?;
         self.context
             .warp_to_slot(clock.slot.checked_add(incremental_slots).unwrap())
-            .map_err(|_| BanksClientError::ClientError("failed to warp slot"))?;
-        Ok(())
-    }
-
-    pub async fn warp_to_slot(&mut self, warp_slot: u64) -> Result<(), BanksClientError> {
-        self.context
-            .warp_to_slot(warp_slot)
             .map_err(|_| BanksClientError::ClientError("failed to warp slot"))?;
         Ok(())
     }

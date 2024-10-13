@@ -11,7 +11,7 @@ mod tests {
     #[tokio::test]
     async fn test_propose_slash_ok() {
         let mut fixture = TestBuilder::new().await;
-        let mut restaking_program_client = fixture.restaking_program_client();
+        // let mut restaking_program_client = fixture.restaking_program_client();
         let mut resolver_program_client = fixture.resolver_program_client();
 
         let deposit_fee_bps = 0;
@@ -22,6 +22,7 @@ mod tests {
 
         let ConfiguredVault {
             vault_program_client: _,
+            mut restaking_program_client,
             vault_config_admin: _,
             vault_root,
             ncn_root,

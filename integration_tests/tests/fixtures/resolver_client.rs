@@ -1,5 +1,4 @@
 use jito_bytemuck::AccountDeserialize;
-use jito_restaking_core::ncn_vault_slasher_ticket::NcnVaultSlasherTicket;
 use resolver_core::{
     config::Config, ncn_resolver_program_config::NcnResolverProgramConfig,
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
