@@ -1,8 +1,11 @@
+mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
 mod propose_slash;
 mod veto_slash;
 
-pub const MAX_SLASH_AMOUNT: u64 = 100;
-pub const VETO_DURATION: u64 = 100;
+pub(crate) const MINT_AMOUNT: u64 = 100_000;
+pub(crate) const DELEGATION_AMOUNT: u64 = 10_000;
+pub(crate) const MAX_SLASH_AMOUNT: u64 = 100;
+pub(crate) const VETO_DURATION: u64 = 100;

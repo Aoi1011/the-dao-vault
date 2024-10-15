@@ -147,3 +147,57 @@ pub fn veto_slash(
         data: ResolverInstruction::VetoSlash.try_to_vec().unwrap(),
     }
 }
+
+#[allow(clippy::too_many_arguments)]
+pub fn execute_slash(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    vault_config: &Pubkey,
+    ncn: &Pubkey,
+    operator: &Pubkey,
+    vault: &Pubkey,
+    slasher: &Pubkey,
+    ncn_operator_state: &Pubkey,
+    ncn_vault_ticket: &Pubkey,
+    operator_vault_ticket: &Pubkey,
+    vault_ncn_ticket: &Pubkey,
+    vault_operator_delegation: &Pubkey,
+    ncn_vault_slasher_ticket: &Pubkey,
+    vault_ncn_slasher_ticket: &Pubkey,
+    vault_ncn_slasher_operator_ticket: &Pubkey,
+    vault_token_account: &Pubkey,
+    slasher_token_account: &Pubkey,
+    resolver: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*vault_config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new(*vault, false),
+        AccountMeta::new_readonly(*slasher, false),
+        AccountMeta::new_readonly(*ncn_operator_state, false),
+        AccountMeta::new_readonly(*ncn_vault_ticket, false),
+        AccountMeta::new_readonly(*operator_vault_ticket, false),
+        AccountMeta::new_readonly(*vault_ncn_ticket, false),
+        AccountMeta::new(*vault_operator_delegation, false),
+        AccountMeta::new_readonly(*ncn_vault_slasher_ticket, false),
+        AccountMeta::new_readonly(*vault_ncn_slasher_ticket, false),
+        AccountMeta::new(*vault_ncn_slasher_operator_ticket, false),
+        AccountMeta::new(*vault_token_account, false),
+        AccountMeta::new(*slasher_token_account, false),
+        AccountMeta::new_readonly(*resolver, false),
+        AccountMeta::new(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new_readonly(jito_vault_program::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::ExecuteSlash.try_to_vec().unwrap(),
+    }
+}

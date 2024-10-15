@@ -25,7 +25,7 @@ jito-restaking-sdk = { git = "https://github.com/jito-foundation/restaking.git",
 jito-vault-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-vault-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
 jito-vault-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", features = ["no-entrypoint"] }
-jito-vault-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
+jito-vault-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", branch = "master" }
 resolver-core = { path = "resolver_core", version = "0.0.1" }
 resolver-program = { path = "resolver_program", version = "0.0.1" }
 resolver-sdk = { path = "resolver_sdk", version = "0.0.1" }

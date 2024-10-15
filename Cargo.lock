@@ -1907,7 +1907,7 @@ dependencies = [
  "jito-restaking-sdk",
  "jito-vault-core",
  "jito-vault-program",
- "jito-vault-sdk",
+ "jito-vault-sdk 0.0.2 (git+https://github.com/jito-foundation/restaking.git?branch=master)",
  "resolver-core",
  "resolver-program",
  "resolver-sdk",
@@ -2038,7 +2038,7 @@ dependencies = [
  "bytemuck",
  "jito-bytemuck",
  "jito-jsm-core",
- "jito-vault-sdk",
+ "jito-vault-sdk 0.0.2 (git+https://github.com/jito-foundation/restaking.git)",
  "shank",
  "solana-program",
  "spl-associated-token-account",
@@ -2059,13 +2059,25 @@ dependencies = [
  "jito-jsm-core",
  "jito-restaking-core",
  "jito-vault-core",
- "jito-vault-sdk",
+ "jito-vault-sdk 0.0.2 (git+https://github.com/jito-foundation/restaking.git)",
  "shank",
  "solana-program",
  "solana-security-txt",
  "spl-associated-token-account",
  "spl-token",
  "spl-token-2022 3.0.4",
+ "thiserror",
+]
+
+[[package]]
+name = "jito-vault-sdk"
+version = "0.0.2"
+source = "git+https://github.com/jito-foundation/restaking.git?branch=master#78463b21087a16eadca8f39aae4efd27ff76a164"
+dependencies = [
+ "borsh 0.10.3",
+ "shank",
+ "solana-program",
+ "spl-token",
  "thiserror",
 ]
 
@@ -3208,7 +3220,7 @@ dependencies = [
  "jito-restaking-core",
  "jito-restaking-sdk",
  "jito-vault-core",
- "jito-vault-sdk",
+ "jito-vault-sdk 0.0.2 (git+https://github.com/jito-foundation/restaking.git?branch=master)",
  "resolver-sdk",
  "shank",
  "solana-program",
@@ -3223,6 +3235,7 @@ dependencies = [
  "jito-jsm-core",
  "jito-restaking-core",
  "jito-vault-core",
+ "jito-vault-sdk 0.0.2 (git+https://github.com/jito-foundation/restaking.git?branch=master)",
  "resolver-core",
  "resolver-sdk",
  "solana-program",
@@ -3235,7 +3248,9 @@ name = "resolver-sdk"
 version = "0.0.1"
 dependencies = [
  "borsh 0.10.3",
+ "jito-vault-program",
  "solana-program",
+ "spl-token",
  "thiserror",
 ]
 

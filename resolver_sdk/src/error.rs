@@ -8,6 +8,8 @@ pub enum ResolverError {
 
     #[error("SlashProposalVetoPeriodEnded")]
     SlashProposalVetoPeriodEnded,
+    #[error("SlashProposalVetoPeriodNotEnded")]
+    SlashProposalVetoPeriodNotEnded,
     #[error("SlashProposalCompleted")]
     SlashProposalCompleted,
 

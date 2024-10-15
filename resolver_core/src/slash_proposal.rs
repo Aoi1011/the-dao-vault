@@ -78,10 +78,19 @@ impl SlashProposal {
         self.veto_deadline_slot.into()
     }
 
-    pub fn check_veto_deadline_slot(&self, current_slot: u64) -> Result<(), ResolverError> {
+    pub fn check_veto_period_ended(&self, current_slot: u64) -> Result<(), ResolverError> {
         if self.veto_deadline_slot() <= current_slot {
             msg!("Veto period ended");
             return Err(ResolverError::SlashProposalVetoPeriodEnded);
+        }
+
+        Ok(())
+    }
+
+    pub fn check_veto_period_not_ended(&self, current_slot: u64) -> Result<(), ResolverError> {
+        if self.veto_deadline_slot() > current_slot {
+            msg!("Veto period not ended");
+            return Err(ResolverError::SlashProposalVetoPeriodNotEnded);
         }
 
         Ok(())
