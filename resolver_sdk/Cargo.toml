@@ -5,5 +5,7 @@ edition = "2021"
 
 [dependencies]
 borsh = { workspace = true }
+jito-vault-program = { workspace = true }
 solana-program = { workspace = true }
+spl-token = { workspace = true }
 thiserror = { workspace = true }

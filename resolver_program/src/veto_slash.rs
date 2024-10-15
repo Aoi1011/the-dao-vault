@@ -49,7 +49,7 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
 
     resolver.check_admin(resolver_admin_info.key)?;
 
-    slash_proposal.check_veto_deadline_slot(Clock::get()?.slot)?;
+    slash_proposal.check_veto_period_ended(Clock::get()?.slot)?;
     slash_proposal.check_completed()?;
 
     slash_proposal.completed = 1;

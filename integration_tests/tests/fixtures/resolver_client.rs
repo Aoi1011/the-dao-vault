@@ -1,17 +1,29 @@
 use jito_bytemuck::AccountDeserialize;
+use jito_restaking_core::{
+    ncn_operator_state::NcnOperatorState, ncn_vault_slasher_ticket::NcnVaultSlasherTicket,
+    ncn_vault_ticket::NcnVaultTicket, operator_vault_ticket::OperatorVaultTicket,
+};
+use jito_vault_core::{
+    vault::Vault, vault_ncn_slasher_operator_ticket::VaultNcnSlasherOperatorTicket,
+    vault_ncn_slasher_ticket::VaultNcnSlasherTicket, vault_ncn_ticket::VaultNcnTicket,
+    vault_operator_delegation::VaultOperatorDelegation,
+};
 use resolver_core::{
     config::Config, ncn_resolver_program_config::NcnResolverProgramConfig,
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
     slash_proposal::SlashProposal,
 };
-use solana_program::{native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer};
+use solana_program::{
+    clock::Clock, native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer,
+};
 use solana_program_test::BanksClient;
 use solana_sdk::{
     commitment_config::CommitmentLevel, signature::Keypair, signer::Signer,
     transaction::Transaction,
 };
+use spl_associated_token_account::get_associated_token_address;
 
-use super::{restaking_client::NcnRoot, TestResult};
+use super::{restaking_client::NcnRoot, vault_client::VaultRoot, TestResult};
 
 #[derive(Debug)]
 pub struct ResolverRoot {
@@ -296,6 +308,167 @@ impl ResolverProgramClient {
             )],
             Some(&resolver_admin.pubkey()),
             &[resolver_admin],
+            blockhash,
+        ))
+        .await
+    }
+
+    pub async fn do_execute_slash(
+        &mut self,
+        vault_root: &VaultRoot,
+        ncn_pubkey: &Pubkey,
+        slasher_admin: &Keypair,
+        operator_pubkey: &Pubkey,
+        resolver: &Pubkey,
+    ) -> TestResult<()> {
+        let ncn_operator_state_pubkey = NcnOperatorState::find_program_address(
+            &jito_restaking_program::id(),
+            ncn_pubkey,
+            operator_pubkey,
+        )
+        .0;
+        let ncn_vault_ticket_pubkey = NcnVaultTicket::find_program_address(
+            &jito_restaking_program::id(),
+            ncn_pubkey,
+            &vault_root.vault_pubkey,
+        )
+        .0;
+        let operator_vault_ticket_pubkey = OperatorVaultTicket::find_program_address(
+            &jito_restaking_program::id(),
+            operator_pubkey,
+            &vault_root.vault_pubkey,
+        )
+        .0;
+        let vault_ncn_ticket_pubkey = VaultNcnTicket::find_program_address(
+            &jito_vault_program::id(),
+            &vault_root.vault_pubkey,
+            ncn_pubkey,
+        )
+        .0;
+        let vault_operator_delegation = VaultOperatorDelegation::find_program_address(
+            &jito_vault_program::id(),
+            &vault_root.vault_pubkey,
+            operator_pubkey,
+        )
+        .0;
+        let ncn_slasher_ticket_pubkey = NcnVaultSlasherTicket::find_program_address(
+            &jito_restaking_program::id(),
+            ncn_pubkey,
+            &vault_root.vault_pubkey,
+            &slasher_admin.pubkey(),
+        )
+        .0;
+        let vault_slasher_ticket_pubkey = VaultNcnSlasherTicket::find_program_address(
+            &jito_vault_program::id(),
+            &vault_root.vault_pubkey,
+            ncn_pubkey,
+            &slasher_admin.pubkey(),
+        )
+        .0;
+        let config: jito_vault_core::config::Config = self
+            .get_account(
+                &jito_vault_core::config::Config::find_program_address(&jito_vault_program::id()).0,
+            )
+            .await
+            .unwrap();
+        let clock: Clock = self.banks_client.get_sysvar().await?;
+
+        let vault_ncn_slasher_operator_ticket =
+            VaultNcnSlasherOperatorTicket::find_program_address(
+                &jito_vault_program::id(),
+                &vault_root.vault_pubkey,
+                ncn_pubkey,
+                &slasher_admin.pubkey(),
+                operator_pubkey,
+                clock.slot / config.epoch_length(),
+            )
+            .0;
+
+        let vault: Vault = self.get_account(&vault_root.vault_pubkey).await.unwrap();
+        let vault_token_account =
+            get_associated_token_address(&vault_root.vault_pubkey, &vault.supported_mint);
+        let slasher_token_account =
+            get_associated_token_address(&slasher_admin.pubkey(), &vault.supported_mint);
+
+        let slash_proposal = SlashProposal::find_program_address(
+            &resolver_program::id(),
+            &ncn_pubkey,
+            &operator_pubkey,
+            &resolver,
+        )
+        .0;
+        let ncn_slash_proposal_ticket =
+            NcnSlashProposalTicket::find_program_address(&resolver_program::id(), ncn_pubkey).0;
+
+        self.execute_slash(
+            ncn_pubkey,
+            operator_pubkey,
+            &vault_root.vault_pubkey,
+            slasher_admin,
+            &ncn_operator_state_pubkey,
+            &ncn_vault_ticket_pubkey,
+            &operator_vault_ticket_pubkey,
+            &vault_ncn_ticket_pubkey,
+            &vault_operator_delegation,
+            &ncn_slasher_ticket_pubkey,
+            &vault_slasher_ticket_pubkey,
+            &vault_ncn_slasher_operator_ticket,
+            &vault_token_account,
+            &slasher_token_account,
+            resolver,
+            &slash_proposal,
+            &ncn_slash_proposal_ticket,
+        )
+        .await
+    }
+
+    async fn execute_slash(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        vault: &Pubkey,
+        slasher_admin: &Keypair,
+        ncn_operator_state: &Pubkey,
+        ncn_vault_ticket: &Pubkey,
+        operator_vault_ticket: &Pubkey,
+        vault_ncn_ticket: &Pubkey,
+        vault_operator_delegation: &Pubkey,
+        ncn_vault_slasher_ticket: &Pubkey,
+        vault_ncn_slasher_ticket: &Pubkey,
+        vault_ncn_slasher_operator_ticket: &Pubkey,
+        vault_token_account: &Pubkey,
+        slasher_token_account: &Pubkey,
+        resolver: &Pubkey,
+        slash_proposal: &Pubkey,
+        ncn_slash_proposal_ticket: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::execute_slash(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                &jito_vault_core::config::Config::find_program_address(&jito_vault_program::id()).0,
+                ncn,
+                operator,
+                vault,
+                &slasher_admin.pubkey(),
+                ncn_operator_state,
+                ncn_vault_ticket,
+                operator_vault_ticket,
+                vault_ncn_ticket,
+                vault_operator_delegation,
+                ncn_vault_slasher_ticket,
+                vault_ncn_slasher_ticket,
+                vault_ncn_slasher_operator_ticket,
+                vault_token_account,
+                slasher_token_account,
+                resolver,
+                slash_proposal,
+                ncn_slash_proposal_ticket,
+            )],
+            Some(&slasher_admin.pubkey()),
+            &[slasher_admin],
             blockhash,
         ))
         .await

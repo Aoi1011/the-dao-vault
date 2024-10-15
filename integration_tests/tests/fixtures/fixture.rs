@@ -6,6 +6,7 @@ use solana_sdk::{
     commitment_config::CommitmentLevel, signature::Keypair, signer::Signer,
     transaction::Transaction,
 };
+use spl_associated_token_account::instruction::create_associated_token_account_idempotent;
 
 use super::{
     resolver_client::ResolverProgramClient,
@@ -97,6 +98,31 @@ impl TestBuilder {
             .await
     }
 
+    pub async fn create_ata(
+        &mut self,
+        mint: &Pubkey,
+        owner: &Pubkey,
+    ) -> Result<(), BanksClientError> {
+        let blockhash = self.context.banks_client.get_latest_blockhash().await?;
+        self.context
+            .banks_client
+            .process_transaction_with_preflight_and_commitment(
+                Transaction::new_signed_with_payer(
+                    &[create_associated_token_account_idempotent(
+                        &self.context.payer.pubkey(),
+                        owner,
+                        mint,
+                        &spl_token::id(),
+                    )],
+                    Some(&self.context.payer.pubkey()),
+                    &[&self.context.payer],
+                    blockhash,
+                ),
+                CommitmentLevel::Processed,
+            )
+            .await
+    }
+
     pub async fn warp_slot_incremental(
         &mut self,
         incremental_slots: u64,
@@ -106,6 +132,11 @@ impl TestBuilder {
             .warp_to_slot(clock.slot.checked_add(incremental_slots).unwrap())
             .map_err(|_| BanksClientError::ClientError("failed to warp slot"))?;
         Ok(())
+    }
+
+    pub async fn get_current_slot(&mut self) -> Result<u64, BanksClientError> {
+        let clock: Clock = self.context.banks_client.get_sysvar().await?;
+        Ok(clock.slot)
     }
 
     /// Configures a vault with an NCN and operators fully configured
