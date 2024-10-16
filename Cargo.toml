@@ -15,17 +15,17 @@ edition = "2021"
 [workspace.dependencies]
 borsh = { version = "0.10.3" }
 bytemuck = { version = "1.16.3", features = ["min_const_generics"] }
-jito-account-traits-derive = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-bytemuck = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-jsm-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-restaking-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-restaking-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-restaking-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", features = ["no-entrypoint"] }
-jito-restaking-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-vault-client = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-vault-core = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2" }
-jito-vault-program = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", features = ["no-entrypoint"] }
-jito-vault-sdk = { git = "https://github.com/jito-foundation/restaking.git", version = "=0.0.2", branch = "master" }
+jito-account-traits-derive = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-bytemuck = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-jsm-core = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-restaking-client = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-restaking-core = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-restaking-program = { git = "https://github.com/jito-foundation/restaking.git", branch = "master", features = ["no-entrypoint"] }
+jito-restaking-sdk = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-vault-client = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-vault-core = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
+jito-vault-program = { git = "https://github.com/jito-foundation/restaking.git", branch = "master", features = ["no-entrypoint"] }
+jito-vault-sdk = { git = "https://github.com/jito-foundation/restaking.git", branch = "master" }
 resolver-core = { path = "resolver_core", version = "0.0.1" }
 resolver-program = { path = "resolver_program", version = "0.0.1" }
 resolver-sdk = { path = "resolver_sdk", version = "0.0.1" }

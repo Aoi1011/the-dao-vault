@@ -128,6 +128,6 @@ mod tests {
         assert_eq!(slash_proposal.operator, operator_roots[0].operator_pubkey);
         assert_eq!(slash_proposal.resolver, resolver_root.resolver_pubkey);
         assert_eq!(slash_proposal.amount(), 100);
-        assert_eq!(slash_proposal.completed, 0);
+        assert!(!slash_proposal.completed());
     }
 }

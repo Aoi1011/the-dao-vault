@@ -144,7 +144,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     slash_proposal.check_veto_period_not_ended(Clock::get()?.slot)?;
     slash_proposal.check_completed()?;
 
-    slash_proposal.completed = 1;
+    slash_proposal.set_completed(true);
 
     drop(vault_data);
 
