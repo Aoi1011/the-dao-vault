@@ -1,5 +1,8 @@
 use bytemuck::{Pod, Zeroable};
-use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
+use jito_bytemuck::{
+    types::{PodBool, PodU64},
+    AccountDeserialize, Discriminator,
+};
 use resolver_sdk::error::ResolverError;
 use shank::ShankAccount;
 use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
@@ -22,7 +25,7 @@ pub struct SlashProposal {
 
     veto_deadline_slot: PodU64,
 
-    pub completed: u8,
+    completed: PodBool,
 
     /// The bump seed for the PDA
     pub bump: u8,
@@ -42,7 +45,7 @@ impl Default for SlashProposal {
             amount: PodU64::from(0),
             capture_slot: PodU64::from(0),
             veto_deadline_slot: PodU64::from(0),
-            completed: 0,
+            completed: PodBool::from_bool(false),
             bump: 0,
             // reserved: [0; 263],
         }
@@ -64,7 +67,7 @@ impl SlashProposal {
             amount: PodU64::from(amount),
             capture_slot: PodU64::from(capture_slot),
             veto_deadline_slot: PodU64::from(veto_deadline_slot),
-            completed: 0,
+            completed: PodBool::from_bool(false),
             bump,
             // reserved: [0; 263],
         }
@@ -76,6 +79,14 @@ impl SlashProposal {
 
     pub fn veto_deadline_slot(&self) -> u64 {
         self.veto_deadline_slot.into()
+    }
+
+    pub fn completed(&self) -> bool {
+        self.completed.into()
+    }
+
+    pub fn set_completed(&mut self, completed: bool) {
+        self.completed = PodBool::from_bool(completed);
     }
 
     pub fn check_veto_period_ended(&self, current_slot: u64) -> Result<(), ResolverError> {
@@ -97,7 +108,7 @@ impl SlashProposal {
     }
 
     pub fn check_completed(&self) -> Result<(), ResolverError> {
-        if self.completed.eq(&1_u8) {
+        if self.completed.into() {
             msg!("Slash proposal completed");
             return Err(ResolverError::SlashProposalCompleted);
         }

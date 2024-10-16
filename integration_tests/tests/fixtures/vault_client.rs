@@ -242,7 +242,7 @@ impl VaultProgramClient {
         self.airdrop(&config_admin.pubkey(), 1.0).await?;
 
         let config_pubkey = Config::find_program_address(&jito_vault_program::id()).0;
-        self.initialize_config(&config_pubkey, &config_admin)
+        self.initialize_config(&config_pubkey, &config_admin, &config_admin.pubkey(), 0)
             .await?;
 
         Ok(config_admin)
@@ -252,14 +252,18 @@ impl VaultProgramClient {
         &mut self,
         config: &Pubkey,
         config_admin: &Keypair,
+        program_fee_wallet: &Pubkey,
+        program_fee_bps: u16,
     ) -> Result<(), TestError> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
         self._process_transaction(&Transaction::new_signed_with_payer(
             &[initialize_config(
                 &jito_vault_program::id(),
-                &config,
+                config,
                 &config_admin.pubkey(),
                 &jito_restaking_program::id(),
+                program_fee_wallet,
+                program_fee_bps,
             )],
             Some(&config_admin.pubkey()),
             &[config_admin],
@@ -936,6 +940,7 @@ impl VaultProgramClient {
         vault_root: &VaultRoot,
         depositor: &Keypair,
         amount: u64,
+        min_amount_out: u64,
     ) -> Result<VaultStakerWithdrawalTicketRoot, TestError> {
         let vault = self.get_vault(&vault_root.vault_pubkey).await.unwrap();
         let depositor_vrt_token_account =
@@ -963,6 +968,7 @@ impl VaultProgramClient {
             &depositor_vrt_token_account,
             &base,
             amount,
+            min_amount_out,
         )
         .await?;
 
@@ -1208,6 +1214,7 @@ impl VaultProgramClient {
         staker_vrt_token_account: &Pubkey,
         base: &Keypair,
         amount: u64,
+        min_amount_out: u64,
     ) -> Result<(), TestError> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
         self._process_transaction(&Transaction::new_signed_with_payer(
@@ -1221,6 +1228,7 @@ impl VaultProgramClient {
                 staker_vrt_token_account,
                 &base.pubkey(),
                 amount,
+                min_amount_out,
             )],
             Some(&staker.pubkey()),
             &[staker, base],
@@ -1235,7 +1243,7 @@ impl VaultProgramClient {
         vault_root: &VaultRoot,
         staker: &Keypair,
         vault_staker_withdrawal_ticket_base: &Pubkey,
-        min_amount_out: u64,
+        program_fee_wallet: &Pubkey,
     ) -> Result<(), TestError> {
         let vault = self.get_vault(&vault_root.vault_pubkey).await.unwrap();
         let vault_staker_withdrawal_ticket = VaultStakerWithdrawalTicket::find_program_address(
@@ -1255,7 +1263,7 @@ impl VaultProgramClient {
             &vault_staker_withdrawal_ticket,
             &get_associated_token_address(&vault_staker_withdrawal_ticket, &vault.vrt_mint),
             &get_associated_token_address(&vault.fee_wallet, &vault.vrt_mint),
-            min_amount_out,
+            &get_associated_token_address(program_fee_wallet, &vault.vrt_mint),
         )
         .await?;
 
@@ -1274,7 +1282,7 @@ impl VaultProgramClient {
         vault_staker_withdrawal_ticket: &Pubkey,
         vault_staker_withdrawal_ticket_token_account: &Pubkey,
         vault_fee_token_account: &Pubkey,
-        min_amount_out: u64,
+        program_fee_vrt_token_account: &Pubkey,
     ) -> Result<(), TestError> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
         self._process_transaction(&Transaction::new_signed_with_payer(
@@ -1284,12 +1292,12 @@ impl VaultProgramClient {
                 vault,
                 vault_token_account,
                 vrt_mint,
-                &staker,
+                staker,
                 staker_token_account,
                 vault_staker_withdrawal_ticket,
                 vault_staker_withdrawal_ticket_token_account,
                 vault_fee_token_account,
-                min_amount_out,
+                program_fee_vrt_token_account,
             )],
             Some(&self.payer.pubkey()),
             &[&self.payer],
