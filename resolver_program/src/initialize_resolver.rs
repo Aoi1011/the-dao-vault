@@ -14,7 +14,7 @@ use solana_program::{
 };
 
 pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
-    let [config, ncn_resolver_program_config, ncn, resolver_info, base, ncn_slasher_admin, payer, resolver_admin, system_program] =
+    let [config, ncn_resolver_program_config, ncn, resolver_info, admin, base, system_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -32,10 +32,8 @@ pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]
 
     Ncn::load(&config.jito_restaking_program, ncn, false)?;
     load_system_account(resolver_info, true)?;
+    load_signer(admin, true)?;
     load_signer(base, false)?;
-    load_signer(ncn_slasher_admin, true)?;
-    load_signer(payer, true)?;
-
     load_system_program(system_program)?;
 
     let (resolver_pubkey, resolver_bump, mut resolver_seed) =
@@ -48,7 +46,7 @@ pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]
 
     msg!("Initializing resolver at address: {}", resolver_info.key);
     create_account(
-        payer,
+        admin,
         resolver_info,
         system_program,
         program_id,
@@ -65,7 +63,7 @@ pub fn process_initialize_resolver(program_id: &Pubkey, accounts: &[AccountInfo]
 
     *resolver = Resolver::new(
         *base.key,
-        *resolver_admin.key,
+        *admin.key,
         ncn_resolver_program_config.resolver_count(),
         resolver_bump,
     );

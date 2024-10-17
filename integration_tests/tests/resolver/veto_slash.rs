@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
     use resolver_core::{config::Config, slash_proposal::SlashProposal};
-    use solana_sdk::{signature::Keypair, signer::Signer};
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
@@ -54,13 +53,8 @@ mod tests {
             .await
             .unwrap();
 
-        let resolver = Keypair::new();
-        resolver_program_client
-            ._airdrop(&resolver.pubkey(), 100.0)
-            .await
-            .unwrap();
         let resolver_root = resolver_program_client
-            .do_initialize_resolver(&ncn_root, &resolver.pubkey())
+            .do_initialize_resolver(&ncn_root)
             .await
             .unwrap();
 
@@ -98,7 +92,7 @@ mod tests {
                 &ncn_root.ncn_pubkey,
                 &operator_roots[0].operator_pubkey,
                 &resolver_root.resolver_pubkey,
-                &resolver,
+                &resolver_root.resolver_admin,
             )
             .await
             .unwrap();
