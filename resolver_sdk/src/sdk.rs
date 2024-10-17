@@ -61,20 +61,16 @@ pub fn initialize_resolver(
     ncn_resolver_program_config: &Pubkey,
     ncn: &Pubkey,
     resolver: &Pubkey,
+    admin: &Pubkey,
     base: &Pubkey,
-    ncn_slasher_admin: &Pubkey,
-    payer: &Pubkey,
-    resolver_admin: &Pubkey,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
         AccountMeta::new(*ncn_resolver_program_config, false),
         AccountMeta::new_readonly(*ncn, false),
         AccountMeta::new(*resolver, false),
+        AccountMeta::new(*admin, true),
         AccountMeta::new(*base, true),
-        AccountMeta::new(*ncn_slasher_admin, true),
-        AccountMeta::new(*payer, true),
-        AccountMeta::new_readonly(*resolver_admin, false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 

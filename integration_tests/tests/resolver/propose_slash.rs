@@ -95,9 +95,8 @@ mod tests {
             .await
             .unwrap();
 
-        let resolver = Keypair::new();
         let resolver_root = resolver_program_client
-            .do_initialize_resolver(&ncn_root, &resolver.pubkey())
+            .do_initialize_resolver(&ncn_root)
             .await
             .unwrap();
 

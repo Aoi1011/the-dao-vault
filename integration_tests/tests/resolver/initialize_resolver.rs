@@ -87,10 +87,10 @@ mod tests {
             .await
             .unwrap();
 
-        let resolver = Keypair::new();
-        let resolver_pubkey = resolver.pubkey();
+        // let resolver = Keypair::new();
+        // let resolver_pubkey = resolver.pubkey();
         let resolver_root = resolver_program_client
-            .do_initialize_resolver(&ncn_root, &resolver.pubkey())
+            .do_initialize_resolver(&ncn_root)
             .await
             .unwrap();
 
@@ -99,7 +99,7 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(resolver.admin, resolver_pubkey);
+        assert_eq!(resolver.admin, resolver_root.resolver_admin.pubkey());
         assert_eq!(resolver.index(), 0);
 
         let ncn_resolver_program_config: NcnResolverProgramConfig = resolver_program_client

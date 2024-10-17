@@ -28,6 +28,7 @@ use super::{restaking_client::NcnRoot, vault_client::VaultRoot, TestResult};
 #[derive(Debug)]
 pub struct ResolverRoot {
     pub resolver_pubkey: Pubkey,
+    pub resolver_admin: Keypair,
 }
 
 #[derive(Debug)]
@@ -149,35 +150,35 @@ impl ResolverProgramClient {
         .await
     }
 
-    pub async fn do_initialize_resolver(
-        &mut self,
-        ncn_root: &NcnRoot,
-        resolver_admin: &Pubkey,
-    ) -> TestResult<ResolverRoot> {
+    pub async fn do_initialize_resolver(&mut self, ncn_root: &NcnRoot) -> TestResult<ResolverRoot> {
         // create resolver + add operator vault
         let resolver_base = Keypair::new();
         let resolver_pubkey =
             Resolver::find_program_address(&resolver_program::id(), &resolver_base.pubkey()).0;
 
+        let resolver_admin = Keypair::new();
+        self._airdrop(&resolver_admin.pubkey(), 1.0).await?;
+
         self.initialize_resolver(
             &ncn_root.ncn_pubkey,
             &resolver_pubkey,
+            &resolver_admin,
             &resolver_base,
-            &ncn_root.ncn_admin,
-            resolver_admin,
         )
         .await?;
 
-        Ok(ResolverRoot { resolver_pubkey })
+        Ok(ResolverRoot {
+            resolver_pubkey,
+            resolver_admin,
+        })
     }
 
     async fn initialize_resolver(
         &mut self,
         ncn: &Pubkey,
         resolver: &Pubkey,
+        admin: &Keypair,
         base: &Keypair,
-        ncn_slasher_admin: &Keypair,
-        resolver_admin: &Pubkey,
     ) -> TestResult<()> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
 
@@ -188,13 +189,11 @@ impl ResolverProgramClient {
                 &NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0,
                 ncn,
                 resolver,
+                &admin.pubkey(),
                 &base.pubkey(),
-                &ncn_slasher_admin.pubkey(),
-                &self.payer.pubkey(),
-                resolver_admin,
             )],
-            Some(&self.payer.pubkey()),
-            &[base, ncn_slasher_admin, &self.payer],
+            Some(&admin.pubkey()),
+            &[admin, base],
             blockhash,
         ))
         .await
