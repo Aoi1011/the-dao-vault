@@ -20,7 +20,7 @@ pub struct NcnSlashProposalTicket {
 }
 
 impl Discriminator for NcnSlashProposalTicket {
-    const DISCRIMINATOR: u8 = 3;
+    const DISCRIMINATOR: u8 = 6;
 }
 
 impl NcnSlashProposalTicket {

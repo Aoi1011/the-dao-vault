@@ -5,6 +5,7 @@ pub enum ResolverInstruction {
     InitializeConfig,
     InitializeNcnResolverProgramConfig { veto_duration: u64 },
     InitializeResolver,
+    InitializeSlasher,
     ProposeSlash { slash_amount: u64 },
     VetoSlash,
     ExecuteSlash,

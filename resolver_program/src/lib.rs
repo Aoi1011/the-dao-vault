@@ -2,6 +2,7 @@ mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
+mod initialize_slasher;
 mod propose_slash;
 mod veto_slash;
 
@@ -15,7 +16,8 @@ use solana_program::{
 use crate::{
     execute_slash::process_execute_slash, initialize_config::process_initialize_config,
     initialize_ncn_resolver_program_config::process_initialize_resolver_program_config,
-    initialize_resolver::process_initialize_resolver, propose_slash::process_propose_slash,
+    initialize_resolver::process_initialize_resolver,
+    initialize_slasher::process_initialize_slasher, propose_slash::process_propose_slash,
     veto_slash::process_veto_slash,
 };
 
@@ -49,6 +51,11 @@ pub fn process_instruction(
         ResolverInstruction::InitializeResolver => {
             msg!("Instruction: InitializeResolver");
             process_initialize_resolver(program_id, accounts)?;
+        }
+
+        ResolverInstruction::InitializeSlasher => {
+            msg!("Instruction: InitializeSlasher");
+            process_initialize_slasher(program_id, accounts)?;
         }
 
         ResolverInstruction::ProposeSlash { slash_amount } => {

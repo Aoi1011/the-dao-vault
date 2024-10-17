@@ -34,7 +34,7 @@ pub struct SlashProposal {
 }
 
 impl Discriminator for SlashProposal {
-    const DISCRIMINATOR: u8 = 1;
+    const DISCRIMINATOR: u8 = 5;
 }
 
 impl Default for SlashProposal {

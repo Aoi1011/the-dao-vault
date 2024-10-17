@@ -18,7 +18,7 @@ pub struct NcnResolverProgramConfig {
 }
 
 impl Discriminator for NcnResolverProgramConfig {
-    const DISCRIMINATOR: u8 = 1;
+    const DISCRIMINATOR: u8 = 2;
 }
 
 impl NcnResolverProgramConfig {

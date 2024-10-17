@@ -87,6 +87,30 @@ pub fn initialize_resolver(
     }
 }
 
+pub fn initialize_slasher(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    slasher: &Pubkey,
+    admin: &Pubkey,
+    base: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new(*slasher, false),
+        AccountMeta::new(*admin, true),
+        AccountMeta::new(*base, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::InitializeSlasher.try_to_vec().unwrap(),
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn propose_slash(
     program_id: &Pubkey,
