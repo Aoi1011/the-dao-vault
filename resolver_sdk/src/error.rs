@@ -6,6 +6,9 @@ pub enum ResolverError {
     #[error("ResolverAdminInvalid")]
     ResolverAdminInvalid,
 
+    #[error("SlasherAdminInvalid")]
+    SlasherAdminInvalid,
+
     #[error("SlashProposalVetoPeriodEnded")]
     SlashProposalVetoPeriodEnded,
     #[error("SlashProposalVetoPeriodNotEnded")]

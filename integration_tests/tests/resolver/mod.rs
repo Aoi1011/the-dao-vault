@@ -2,6 +2,7 @@ mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
+mod initialize_slasher;
 mod propose_slash;
 mod veto_slash;
 

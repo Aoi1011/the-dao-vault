@@ -11,7 +11,7 @@ use jito_vault_core::{
 use resolver_core::{
     config::Config, ncn_resolver_program_config::NcnResolverProgramConfig,
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
-    slash_proposal::SlashProposal,
+    slash_proposal::SlashProposal, slasher::Slasher,
 };
 use solana_program::{
     clock::Clock, native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer,
@@ -28,6 +28,12 @@ use super::{restaking_client::NcnRoot, vault_client::VaultRoot, TestResult};
 #[derive(Debug)]
 pub struct ResolverRoot {
     pub resolver_pubkey: Pubkey,
+}
+
+#[derive(Debug)]
+pub struct SlasherRoot {
+    pub slasher_pubkey: Pubkey,
+    pub slasher_admin: Keypair,
 }
 
 pub struct ResolverProgramClient {
@@ -189,6 +195,54 @@ impl ResolverProgramClient {
             )],
             Some(&self.payer.pubkey()),
             &[base, ncn_slasher_admin, &self.payer],
+            blockhash,
+        ))
+        .await
+    }
+
+    pub async fn do_initialize_slasher(&mut self, ncn_root: &NcnRoot) -> TestResult<SlasherRoot> {
+        // create resolver + add operator vault
+        let slasher_base = Keypair::new();
+        let slasher_pubkey =
+            Slasher::find_program_address(&resolver_program::id(), &slasher_base.pubkey()).0;
+
+        let slasher_admin = Keypair::new();
+        self._airdrop(&slasher_admin.pubkey(), 1.0).await?;
+
+        self.initialize_slasher(
+            &ncn_root.ncn_pubkey,
+            &slasher_pubkey,
+            &slasher_admin,
+            &slasher_base,
+        )
+        .await?;
+
+        Ok(SlasherRoot {
+            slasher_pubkey,
+            slasher_admin,
+        })
+    }
+
+    async fn initialize_slasher(
+        &mut self,
+        ncn: &Pubkey,
+        slasher: &Pubkey,
+        admin: &Keypair,
+        base: &Keypair,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::initialize_slasher(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                ncn,
+                slasher,
+                &admin.pubkey(),
+                &base.pubkey(),
+            )],
+            Some(&admin.pubkey()),
+            &[admin, base],
             blockhash,
         ))
         .await
