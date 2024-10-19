@@ -7,6 +7,7 @@ pub enum ResolverInstruction {
     InitializeResolver,
     InitializeSlasher,
     ProposeSlash { slash_amount: u64 },
+    SetResolver,
     VetoSlash,
     ExecuteSlash,
 }

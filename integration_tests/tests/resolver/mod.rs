@@ -4,6 +4,7 @@ mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
 mod initialize_slasher;
 mod propose_slash;
+mod set_resolver;
 mod veto_slash;
 
 pub(crate) const MINT_AMOUNT: u64 = 100_000;

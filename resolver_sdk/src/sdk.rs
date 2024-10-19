@@ -142,6 +142,36 @@ pub fn propose_slash(
 }
 
 #[allow(clippy::too_many_arguments)]
+pub fn set_resolver(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    operator: &Pubkey,
+    slasher: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+    ncn_slasher_admin: &Pubkey,
+    new_resolver_info: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new_readonly(*slasher, false),
+        AccountMeta::new_readonly(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new_readonly(*ncn_slasher_admin, true),
+        AccountMeta::new_readonly(*new_resolver_info, false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::SetResolver.try_to_vec().unwrap(),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 pub fn veto_slash(
     program_id: &Pubkey,
     config: &Pubkey,

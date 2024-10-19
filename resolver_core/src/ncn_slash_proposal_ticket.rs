@@ -38,12 +38,24 @@ impl NcnSlashProposalTicket {
         }
     }
 
-    pub fn seeds(ncn: &Pubkey) -> Vec<Vec<u8>> {
-        Vec::from_iter([b"ncn_slash_proposal_ticket".to_vec(), ncn.as_ref().to_vec()])
+    pub fn set_resolver(&mut self, new_resolver: Pubkey) {
+        self.resolver = new_resolver;
     }
 
-    pub fn find_program_address(program_id: &Pubkey, ncn: &Pubkey) -> (Pubkey, u8, Vec<Vec<u8>>) {
-        let seeds = Self::seeds(ncn);
+    pub fn seeds(ncn: &Pubkey, slash_proposal: &Pubkey) -> Vec<Vec<u8>> {
+        Vec::from_iter([
+            b"ncn_slash_proposal_ticket".to_vec(),
+            ncn.as_ref().to_vec(),
+            slash_proposal.as_ref().to_vec(),
+        ])
+    }
+
+    pub fn find_program_address(
+        program_id: &Pubkey,
+        ncn: &Pubkey,
+        slash_proposal: &Pubkey,
+    ) -> (Pubkey, u8, Vec<Vec<u8>>) {
+        let seeds = Self::seeds(ncn, slash_proposal);
         let seeds_iter: Vec<_> = seeds.iter().map(|s| s.as_slice()).collect();
         let (pda, bump) = Pubkey::find_program_address(&seeds_iter, program_id);
         (pda, bump, seeds)
@@ -61,30 +73,31 @@ impl NcnSlashProposalTicket {
     /// * `Result<(), ProgramError>` - The result of the operation
     pub fn load(
         program_id: &Pubkey,
-        slash_request_list: &AccountInfo,
+        ncn_slash_proposal_ticket: &AccountInfo,
         ncn: &AccountInfo,
+        slash_proposal: &AccountInfo,
         expect_writable: bool,
     ) -> Result<(), ProgramError> {
-        if slash_request_list.owner.ne(program_id) {
-            msg!("RequestSlashList account has an invalid owner");
+        if ncn_slash_proposal_ticket.owner.ne(program_id) {
+            msg!("NcnSlashProposalTicket account has an invalid owner");
             return Err(ProgramError::InvalidAccountOwner);
         }
-        if slash_request_list.data_is_empty() {
-            msg!("RequestSlashList account data is empty");
+        if ncn_slash_proposal_ticket.data_is_empty() {
+            msg!("NcnSlashProposalTicket account data is empty");
             return Err(ProgramError::InvalidAccountData);
         }
-        if expect_writable && !slash_request_list.is_writable {
-            msg!("RequestSlashList account is not writable");
+        if expect_writable && !ncn_slash_proposal_ticket.is_writable {
+            msg!("NcnSlashProposalTicket account is not writable");
             return Err(ProgramError::InvalidAccountData);
         }
-        if slash_request_list.data.borrow()[0].ne(&Self::DISCRIMINATOR) {
-            msg!("RequestSlashList account discriminator is invalid");
+        if ncn_slash_proposal_ticket.data.borrow()[0].ne(&Self::DISCRIMINATOR) {
+            msg!("NcnSlashProposalTicket account discriminator is invalid");
             return Err(ProgramError::InvalidAccountData);
         }
 
-        let expected_pubkey = Self::find_program_address(program_id, ncn.key).0;
-        if slash_request_list.key.ne(&expected_pubkey) {
-            msg!("RequestSlashList account is not at the correct PDA");
+        let expected_pubkey = Self::find_program_address(program_id, ncn.key, slash_proposal.key).0;
+        if ncn_slash_proposal_ticket.key.ne(&expected_pubkey) {
+            msg!("NcnSlashProposalTicket account is not at the correct PDA");
             return Err(ProgramError::InvalidAccountData);
         }
         Ok(())

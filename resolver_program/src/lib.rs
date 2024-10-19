@@ -4,6 +4,7 @@ mod initialize_ncn_resolver_program_config;
 mod initialize_resolver;
 mod initialize_slasher;
 mod propose_slash;
+mod set_resolver;
 mod veto_slash;
 
 use borsh::BorshDeserialize;
@@ -18,7 +19,7 @@ use crate::{
     initialize_ncn_resolver_program_config::process_initialize_resolver_program_config,
     initialize_resolver::process_initialize_resolver,
     initialize_slasher::process_initialize_slasher, propose_slash::process_propose_slash,
-    veto_slash::process_veto_slash,
+    set_resolver::process_set_resolver, veto_slash::process_veto_slash,
 };
 
 declare_id!("AE7fSUJSGxMzjNxSPpNTemrz9cr26RFue4GwoJ1cuR6f");
@@ -61,6 +62,11 @@ pub fn process_instruction(
         ResolverInstruction::ProposeSlash { slash_amount } => {
             msg!("Instruction: ProposeSlash");
             process_propose_slash(program_id, accounts, slash_amount)?;
+        }
+
+        ResolverInstruction::SetResolver => {
+            msg!("Instruction: SetResolver");
+            process_set_resolver(program_id, accounts)?;
         }
 
         ResolverInstruction::VetoSlash => {
