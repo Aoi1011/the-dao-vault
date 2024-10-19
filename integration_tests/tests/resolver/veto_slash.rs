@@ -40,30 +40,10 @@ mod tests {
 
         let slasher_root = &slashers_amounts[0].0;
 
-        // resolver_program_client
-        //     .do_initialize_config()
-        //     .await
-        //     .unwrap();
-
-        // resolver_program_client
-        //     .do_initialize_ncn_resolver_program_config(
-        //         &Config::find_program_address(&resolver_program::id()).0,
-        //         &ncn_root.ncn_pubkey,
-        //         &ncn_root.ncn_admin,
-        //         VETO_DURATION,
-        //     )
-        //     .await
-        //     .unwrap();
-
         let resolver_root = resolver_program_client
             .do_initialize_resolver(&ncn_root)
             .await
             .unwrap();
-
-        //         let slasher_root = resolver_program_client
-        //             .do_initialize_slasher(&ncn_root)
-        //             .await
-        //             .unwrap();
 
         resolver_program_client
             .do_propose_slash(
@@ -93,12 +73,22 @@ mod tests {
         assert!(!slash_proposal.completed());
 
         resolver_program_client
+            .do_set_resolver(
+                &ncn_root.ncn_pubkey,
+                &operator_roots[0].operator_pubkey,
+                &slasher_root,
+                &ncn_root.ncn_admin,
+                &resolver_root.resolver_pubkey,
+            )
+            .await
+            .unwrap();
+
+        resolver_program_client
             .do_veto_slash(
                 &ncn_root.ncn_pubkey,
                 &operator_roots[0].operator_pubkey,
                 &slasher_root,
-                &resolver_root.resolver_pubkey,
-                &resolver_root.resolver_admin,
+                &resolver_root,
             )
             .await
             .unwrap();

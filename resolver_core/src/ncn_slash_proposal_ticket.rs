@@ -1,5 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{AccountDeserialize, Discriminator};
+use resolver_sdk::error::ResolverError;
 use shank::ShankAccount;
 use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError, pubkey::Pubkey};
 
@@ -40,6 +41,24 @@ impl NcnSlashProposalTicket {
 
     pub fn set_resolver(&mut self, new_resolver: Pubkey) {
         self.resolver = new_resolver;
+    }
+
+    pub fn check_slash_proposal(&self, slash_proposal: &Pubkey) -> Result<(), ResolverError> {
+        if self.slash_proposal.ne(slash_proposal) {
+            msg!("Slash proposal is incorrect");
+            return Err(ResolverError::SlashProposalInvalid);
+        }
+
+        Ok(())
+    }
+
+    pub fn check_resolver(&self, resolver: &Pubkey) -> Result<(), ResolverError> {
+        if self.resolver.ne(resolver) {
+            msg!("Slash proposal's resolver is incorrect");
+            return Err(ResolverError::SlashProposalResolverInvalid);
+        }
+
+        Ok(())
     }
 
     pub fn seeds(ncn: &Pubkey, slash_proposal: &Pubkey) -> Vec<Vec<u8>> {
