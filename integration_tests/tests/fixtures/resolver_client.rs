@@ -262,8 +262,12 @@ impl ResolverProgramClient {
             &slasher_root.slasher_pubkey,
         )
         .0;
-        let ncn_slash_proposal_ticket =
-            NcnSlashProposalTicket::find_program_address(&resolver_program::id(), ncn).0;
+        let ncn_slash_proposal_ticket = NcnSlashProposalTicket::find_program_address(
+            &resolver_program::id(),
+            ncn,
+            &slash_proposal,
+        )
+        .0;
 
         self.propose_slash(
             ncn,
@@ -309,6 +313,72 @@ impl ResolverProgramClient {
         .await
     }
 
+    pub async fn do_set_resolver(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        slasher_root: &SlasherRoot,
+        ncn_slasher_admin: &Keypair,
+        new_resolver_admin: &Pubkey,
+    ) -> TestResult<()> {
+        // create resolver + add operator vault
+        let slash_proposal = SlashProposal::find_program_address(
+            &resolver_program::id(),
+            &ncn,
+            &operator,
+            &slasher_root.slasher_pubkey,
+        )
+        .0;
+        let ncn_slash_proposal_ticket = NcnSlashProposalTicket::find_program_address(
+            &resolver_program::id(),
+            ncn,
+            &slash_proposal,
+        )
+        .0;
+
+        self.set_resolver(
+            ncn,
+            operator,
+            &slasher_root.slasher_pubkey,
+            &slash_proposal,
+            &ncn_slash_proposal_ticket,
+            ncn_slasher_admin,
+            new_resolver_admin,
+        )
+        .await
+    }
+
+    async fn set_resolver(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        slasher: &Pubkey,
+        slash_proposal: &Pubkey,
+        ncn_slash_proposal_ticket: &Pubkey,
+        ncn_slasher_admin: &Keypair,
+        new_resolver_admin: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::set_resolver(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                ncn,
+                operator,
+                slasher,
+                slash_proposal,
+                ncn_slash_proposal_ticket,
+                &ncn_slasher_admin.pubkey(),
+                new_resolver_admin,
+            )],
+            Some(&ncn_slasher_admin.pubkey()),
+            &[ncn_slasher_admin],
+            blockhash,
+        ))
+        .await
+    }
+
     pub async fn do_veto_slash(
         &mut self,
         ncn: &Pubkey,
@@ -324,8 +394,12 @@ impl ResolverProgramClient {
             &slasher_root.slasher_pubkey,
         )
         .0;
-        let ncn_slash_proposal_ticket =
-            NcnSlashProposalTicket::find_program_address(&resolver_program::id(), ncn).0;
+        let ncn_slash_proposal_ticket = NcnSlashProposalTicket::find_program_address(
+            &resolver_program::id(),
+            ncn,
+            &slash_proposal,
+        )
+        .0;
 
         self.veto_slash(
             ncn,
@@ -454,8 +528,12 @@ impl ResolverProgramClient {
             &slasher_root.slasher_pubkey,
         )
         .0;
-        let ncn_slash_proposal_ticket =
-            NcnSlashProposalTicket::find_program_address(&resolver_program::id(), ncn_pubkey).0;
+        let ncn_slash_proposal_ticket = NcnSlashProposalTicket::find_program_address(
+            &resolver_program::id(),
+            ncn_pubkey,
+            &slash_proposal,
+        )
+        .0;
 
         self.execute_slash(
             ncn_pubkey,

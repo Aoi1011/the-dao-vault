@@ -104,7 +104,11 @@ pub fn process_propose_slash(
     // Initialize NcnSlashProposalTicket
     {
         let (ncn_slash_proposal_pubkey, ncn_slash_proposal_bump, mut ncn_slash_proposal_seed) =
-            NcnSlashProposalTicket::find_program_address(program_id, ncn_info.key);
+            NcnSlashProposalTicket::find_program_address(
+                program_id,
+                ncn_info.key,
+                slash_proposal_info.key,
+            );
         ncn_slash_proposal_seed.push(vec![ncn_slash_proposal_bump]);
         if ncn_slash_proposal_ticket_info
             .key

@@ -40,7 +40,13 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
     let mut slash_proposal_data = slash_proposal_info.data.borrow_mut();
     let slash_proposal = SlashProposal::try_from_slice_unchecked_mut(&mut slash_proposal_data)?;
 
-    NcnSlashProposalTicket::load(program_id, ncn_slash_proposal_ticket_info, ncn_info, false)?;
+    NcnSlashProposalTicket::load(
+        program_id,
+        ncn_slash_proposal_ticket_info,
+        ncn_info,
+        slash_proposal_info,
+        false,
+    )?;
     let ncn_slash_proposal_ticket_data = ncn_slash_proposal_ticket_info.data.borrow();
     let _ncn_slash_proposal_ticket =
         NcnSlashProposalTicket::try_from_slice_unchecked(&ncn_slash_proposal_ticket_data)?;
