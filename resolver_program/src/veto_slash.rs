@@ -48,7 +48,7 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
         false,
     )?;
     let ncn_slash_proposal_ticket_data = ncn_slash_proposal_ticket_info.data.borrow();
-    let _ncn_slash_proposal_ticket =
+    let ncn_slash_proposal_ticket =
         NcnSlashProposalTicket::try_from_slice_unchecked(&ncn_slash_proposal_ticket_data)?;
 
     load_signer(resolver_admin_info, true)?;
@@ -58,6 +58,9 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
 
     slash_proposal.check_veto_period_ended(Clock::get()?.slot)?;
     slash_proposal.check_completed()?;
+
+    ncn_slash_proposal_ticket.check_resolver(resolver_info.key)?;
+    ncn_slash_proposal_ticket.check_slash_proposal(slash_proposal_info.key)?;
 
     slash_proposal.set_completed(true);
 

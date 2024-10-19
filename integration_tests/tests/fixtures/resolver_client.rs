@@ -384,8 +384,7 @@ impl ResolverProgramClient {
         ncn: &Pubkey,
         operator: &Pubkey,
         slasher_root: &SlasherRoot,
-        resolver: &Pubkey,
-        resolver_admin: &Keypair,
+        resolver_root: &ResolverRoot,
     ) -> TestResult<()> {
         let slash_proposal = SlashProposal::find_program_address(
             &resolver_program::id(),
@@ -405,10 +404,10 @@ impl ResolverProgramClient {
             ncn,
             operator,
             &slasher_root.slasher_pubkey,
-            resolver,
+            &resolver_root.resolver_pubkey,
             &slash_proposal,
             &ncn_slash_proposal_ticket,
-            resolver_admin,
+            &resolver_root.resolver_admin,
         )
         .await
     }

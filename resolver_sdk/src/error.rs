@@ -15,6 +15,10 @@ pub enum ResolverError {
     SlashProposalVetoPeriodNotEnded,
     #[error("SlashProposalCompleted")]
     SlashProposalCompleted,
+    #[error("SlashProposalInvalid")]
+    SlashProposalInvalid,
+    #[error("SlashProposalResolverInvalid")]
+    SlashProposalResolverInvalid,
 
     #[error("ArithmeticOverflow")]
     ArithmeticOverflow = 3000,
