@@ -251,8 +251,7 @@ impl ResolverProgramClient {
         &mut self,
         ncn: &Pubkey,
         operator: &Pubkey,
-        resolver: &Pubkey,
-        slasher_admin: &Keypair,
+        slasher_root: &SlasherRoot,
         slash_amount: u64,
     ) -> TestResult<()> {
         // create resolver + add operator vault
@@ -260,7 +259,7 @@ impl ResolverProgramClient {
             &resolver_program::id(),
             &ncn,
             &operator,
-            &resolver,
+            &slasher_root.slasher_pubkey,
         )
         .0;
         let ncn_slash_proposal_ticket =
@@ -269,10 +268,10 @@ impl ResolverProgramClient {
         self.propose_slash(
             ncn,
             operator,
-            resolver,
+            &slasher_root.slasher_pubkey,
             &slash_proposal,
             &ncn_slash_proposal_ticket,
-            slasher_admin,
+            &slasher_root.slasher_admin,
             slash_amount,
         )
         .await
@@ -282,7 +281,7 @@ impl ResolverProgramClient {
         &mut self,
         ncn: &Pubkey,
         operator: &Pubkey,
-        resolver: &Pubkey,
+        slasher: &Pubkey,
         slash_proposal: &Pubkey,
         ncn_slash_proposal_ticket: &Pubkey,
         slasher_admin: &Keypair,
@@ -296,7 +295,7 @@ impl ResolverProgramClient {
                 &Config::find_program_address(&resolver_program::id()).0,
                 ncn,
                 operator,
-                resolver,
+                slasher,
                 slash_proposal,
                 ncn_slash_proposal_ticket,
                 &slasher_admin.pubkey(),
@@ -313,6 +312,7 @@ impl ResolverProgramClient {
         &mut self,
         ncn: &Pubkey,
         operator: &Pubkey,
+        slasher_root: &SlasherRoot,
         resolver: &Pubkey,
         resolver_admin: &Keypair,
     ) -> TestResult<()> {
@@ -320,7 +320,7 @@ impl ResolverProgramClient {
             &resolver_program::id(),
             &ncn,
             &operator,
-            &resolver,
+            &slasher_root.slasher_pubkey,
         )
         .0;
         let ncn_slash_proposal_ticket =
@@ -329,6 +329,7 @@ impl ResolverProgramClient {
         self.veto_slash(
             ncn,
             operator,
+            &slasher_root.slasher_pubkey,
             resolver,
             &slash_proposal,
             &ncn_slash_proposal_ticket,
@@ -341,6 +342,7 @@ impl ResolverProgramClient {
         &mut self,
         ncn: &Pubkey,
         operator: &Pubkey,
+        slasher: &Pubkey,
         resolver: &Pubkey,
         slash_proposal: &Pubkey,
         ncn_slash_proposal_ticket: &Pubkey,
@@ -354,6 +356,7 @@ impl ResolverProgramClient {
                 &Config::find_program_address(&resolver_program::id()).0,
                 ncn,
                 operator,
+                slasher,
                 resolver,
                 slash_proposal,
                 ncn_slash_proposal_ticket,
@@ -368,10 +371,10 @@ impl ResolverProgramClient {
 
     pub async fn do_execute_slash(
         &mut self,
-        vault_root: &VaultRoot,
         ncn_pubkey: &Pubkey,
-        slasher_admin: &Keypair,
         operator_pubkey: &Pubkey,
+        slasher_root: &SlasherRoot,
+        vault_root: &VaultRoot,
         resolver: &Pubkey,
     ) -> TestResult<()> {
         let ncn_operator_state_pubkey = NcnOperatorState::find_program_address(
@@ -408,14 +411,14 @@ impl ResolverProgramClient {
             &jito_restaking_program::id(),
             ncn_pubkey,
             &vault_root.vault_pubkey,
-            &slasher_admin.pubkey(),
+            &slasher_root.slasher_pubkey,
         )
         .0;
         let vault_slasher_ticket_pubkey = VaultNcnSlasherTicket::find_program_address(
             &jito_vault_program::id(),
             &vault_root.vault_pubkey,
             ncn_pubkey,
-            &slasher_admin.pubkey(),
+            &slasher_root.slasher_pubkey,
         )
         .0;
         let config: jito_vault_core::config::Config = self
@@ -431,7 +434,7 @@ impl ResolverProgramClient {
                 &jito_vault_program::id(),
                 &vault_root.vault_pubkey,
                 ncn_pubkey,
-                &slasher_admin.pubkey(),
+                &slasher_root.slasher_pubkey,
                 operator_pubkey,
                 clock.slot / config.epoch_length(),
             )
@@ -441,13 +444,13 @@ impl ResolverProgramClient {
         let vault_token_account =
             get_associated_token_address(&vault_root.vault_pubkey, &vault.supported_mint);
         let slasher_token_account =
-            get_associated_token_address(&slasher_admin.pubkey(), &vault.supported_mint);
+            get_associated_token_address(&slasher_root.slasher_pubkey, &vault.supported_mint);
 
         let slash_proposal = SlashProposal::find_program_address(
             &resolver_program::id(),
             &ncn_pubkey,
             &operator_pubkey,
-            &resolver,
+            &slasher_root.slasher_pubkey,
         )
         .0;
         let ncn_slash_proposal_ticket =
@@ -456,8 +459,8 @@ impl ResolverProgramClient {
         self.execute_slash(
             ncn_pubkey,
             operator_pubkey,
+            &slasher_root,
             &vault_root.vault_pubkey,
-            slasher_admin,
             &ncn_operator_state_pubkey,
             &ncn_vault_ticket_pubkey,
             &operator_vault_ticket_pubkey,
@@ -479,8 +482,8 @@ impl ResolverProgramClient {
         &mut self,
         ncn: &Pubkey,
         operator: &Pubkey,
+        slasher_root: &SlasherRoot,
         vault: &Pubkey,
-        slasher_admin: &Keypair,
         ncn_operator_state: &Pubkey,
         ncn_vault_ticket: &Pubkey,
         operator_vault_ticket: &Pubkey,
@@ -504,8 +507,9 @@ impl ResolverProgramClient {
                 &jito_vault_core::config::Config::find_program_address(&jito_vault_program::id()).0,
                 ncn,
                 operator,
+                &slasher_root.slasher_pubkey,
                 vault,
-                &slasher_admin.pubkey(),
+                &slasher_root.slasher_admin.pubkey(),
                 ncn_operator_state,
                 ncn_vault_ticket,
                 operator_vault_ticket,
@@ -520,8 +524,8 @@ impl ResolverProgramClient {
                 slash_proposal,
                 ncn_slash_proposal_ticket,
             )],
-            Some(&slasher_admin.pubkey()),
-            &[slasher_admin],
+            Some(&slasher_root.slasher_admin.pubkey()),
+            &[&slasher_root.slasher_admin],
             blockhash,
         ))
         .await

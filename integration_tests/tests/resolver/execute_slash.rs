@@ -9,7 +9,7 @@ mod tests {
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
-        resolver::{DELEGATION_AMOUNT, MAX_SLASH_AMOUNT, MINT_AMOUNT, VETO_DURATION},
+        resolver::{DELEGATION_AMOUNT, MAX_SLASH_AMOUNT, MINT_AMOUNT},
     };
 
     #[tokio::test]
@@ -86,51 +86,38 @@ mod tests {
             .unwrap();
 
         // configure slasher and slash
-        let slasher = &slashers_amounts[0].0;
+        let slasher_root = &slashers_amounts[0].0;
+
         fixture
-            .create_ata(&vault.supported_mint, &slasher.pubkey())
+            .create_ata(&vault.supported_mint, &slasher_root.slasher_pubkey)
             .await
             .unwrap();
+
         let epoch = fixture.get_current_slot().await.unwrap() / config.epoch_length();
         vault_program_client
             .initialize_vault_ncn_slasher_operator_ticket(
                 &jito_vault_core::config::Config::find_program_address(&jito_vault_program::id()).0,
                 &vault_root.vault_pubkey,
                 &ncn_root.ncn_pubkey,
-                &slasher.pubkey(),
+                &slasher_root.slasher_pubkey,
                 &operator_root.operator_pubkey,
                 &VaultNcnSlasherTicket::find_program_address(
                     &jito_vault_program::id(),
                     &vault_root.vault_pubkey,
                     &ncn_root.ncn_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                 )
                 .0,
                 &VaultNcnSlasherOperatorTicket::find_program_address(
                     &jito_vault_program::id(),
                     &vault_root.vault_pubkey,
                     &ncn_root.ncn_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                     &operator_root.operator_pubkey,
                     epoch,
                 )
                 .0,
                 &vault_config_admin,
-            )
-            .await
-            .unwrap();
-
-        resolver_program_client
-            .do_initialize_config()
-            .await
-            .unwrap();
-
-        resolver_program_client
-            .do_initialize_ncn_resolver_program_config(
-                &resolver_core::config::Config::find_program_address(&resolver_program::id()).0,
-                &ncn_root.ncn_pubkey,
-                &ncn_root.ncn_admin,
-                VETO_DURATION,
             )
             .await
             .unwrap();
@@ -144,8 +131,7 @@ mod tests {
             .do_propose_slash(
                 &ncn_root.ncn_pubkey,
                 &operator_roots[0].operator_pubkey,
-                &resolver_root.resolver_pubkey,
-                &slasher,
+                &slasher_root,
                 100,
             )
             .await
@@ -155,10 +141,10 @@ mod tests {
 
         resolver_program_client
             .do_execute_slash(
-                &vault_root,
                 &ncn_root.ncn_pubkey,
-                &slasher,
                 &operator_roots[0].operator_pubkey,
+                &slasher_root,
+                &vault_root,
                 &resolver_root.resolver_pubkey,
             )
             .await
@@ -170,7 +156,7 @@ mod tests {
                     &resolver_program::id(),
                     &ncn_root.ncn_pubkey,
                     &operator_roots[0].operator_pubkey,
-                    &resolver_root.resolver_pubkey,
+                    &slasher_root.slasher_pubkey,
                 )
                 .0,
             )
@@ -178,7 +164,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(slash_proposal.operator, operator_roots[0].operator_pubkey);
-        assert_eq!(slash_proposal.resolver, resolver_root.resolver_pubkey);
+        assert_eq!(slash_proposal.slasher, slasher_root.slasher_pubkey);
         assert_eq!(slash_proposal.amount(), 100);
         assert!(slash_proposal.completed());
     }

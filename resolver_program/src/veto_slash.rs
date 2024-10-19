@@ -3,7 +3,7 @@ use jito_jsm_core::loader::{load_signer, load_system_program};
 use jito_restaking_core::{ncn::Ncn, operator::Operator};
 use resolver_core::{
     config::Config, ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
-    slash_proposal::SlashProposal,
+    slash_proposal::SlashProposal, slasher::Slasher,
 };
 use solana_program::{
     account_info::AccountInfo, clock::Clock, entrypoint::ProgramResult,
@@ -11,7 +11,7 @@ use solana_program::{
 };
 
 pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
-    let [config_info, ncn_info, operator_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, resolver_admin_info, system_program] =
+    let [config_info, ncn_info, operator_info, slasher_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, resolver_admin_info, system_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -23,6 +23,7 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
 
     Ncn::load(&config.jito_restaking_program, ncn_info, false)?;
     Operator::load(&config.jito_restaking_program, operator_info, false)?;
+    Slasher::load(program_id, slasher_info, false)?;
 
     Resolver::load(program_id, resolver_info, false)?;
     let resolver_data = resolver_info.data.borrow();
@@ -33,7 +34,7 @@ pub fn process_veto_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
         slash_proposal_info,
         ncn_info,
         operator_info,
-        resolver_info,
+        slasher_info,
         false,
     )?;
     let mut slash_proposal_data = slash_proposal_info.data.borrow_mut();

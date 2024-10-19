@@ -16,7 +16,7 @@ pub struct SlashProposal {
     pub operator: Pubkey,
 
     /// The operator account
-    pub resolver: Pubkey,
+    pub slasher: Pubkey,
 
     /// The slash amount
     amount: PodU64,
@@ -41,7 +41,7 @@ impl Default for SlashProposal {
     fn default() -> Self {
         Self {
             operator: Pubkey::default(),
-            resolver: Pubkey::default(),
+            slasher: Pubkey::default(),
             amount: PodU64::from(0),
             capture_slot: PodU64::from(0),
             veto_deadline_slot: PodU64::from(0),
@@ -55,7 +55,7 @@ impl Default for SlashProposal {
 impl SlashProposal {
     pub fn new(
         operator: Pubkey,
-        resolver: Pubkey,
+        slasher: Pubkey,
         amount: u64,
         capture_slot: u64,
         veto_deadline_slot: u64,
@@ -63,7 +63,7 @@ impl SlashProposal {
     ) -> Self {
         Self {
             operator,
-            resolver,
+            slasher,
             amount: PodU64::from(amount),
             capture_slot: PodU64::from(capture_slot),
             veto_deadline_slot: PodU64::from(veto_deadline_slot),
@@ -116,12 +116,12 @@ impl SlashProposal {
         Ok(())
     }
 
-    pub fn seeds(ncn: &Pubkey, operator: &Pubkey, resolver: &Pubkey) -> Vec<Vec<u8>> {
+    pub fn seeds(ncn: &Pubkey, operator: &Pubkey, slasher: &Pubkey) -> Vec<Vec<u8>> {
         Vec::from_iter([
             b"slash_proposal".to_vec(),
             ncn.as_ref().to_vec(),
             operator.as_ref().to_vec(),
-            resolver.as_ref().to_vec(),
+            slasher.as_ref().to_vec(),
         ])
     }
 
@@ -129,9 +129,9 @@ impl SlashProposal {
         program_id: &Pubkey,
         ncn: &Pubkey,
         operator: &Pubkey,
-        resolver: &Pubkey,
+        slasher: &Pubkey,
     ) -> (Pubkey, u8, Vec<Vec<u8>>) {
-        let seeds = Self::seeds(ncn, operator, resolver);
+        let seeds = Self::seeds(ncn, operator, slasher);
         let seeds_iter: Vec<_> = seeds.iter().map(|s| s.as_slice()).collect();
         let (pda, bump) = Pubkey::find_program_address(&seeds_iter, program_id);
         (pda, bump, seeds)
@@ -152,7 +152,7 @@ impl SlashProposal {
         slash_proposal: &AccountInfo,
         ncn: &AccountInfo,
         operator: &AccountInfo,
-        resolver: &AccountInfo,
+        slasher: &AccountInfo,
         expect_writable: bool,
     ) -> Result<(), ProgramError> {
         if slash_proposal.owner.ne(program_id) {
@@ -173,7 +173,7 @@ impl SlashProposal {
         }
 
         let expected_pubkey =
-            Self::find_program_address(program_id, ncn.key, operator.key, resolver.key).0;
+            Self::find_program_address(program_id, ncn.key, operator.key, slasher.key).0;
         if slash_proposal.key.ne(&expected_pubkey) {
             msg!("SlashProposal account is not at the correct PDA");
             return Err(ProgramError::InvalidAccountData);

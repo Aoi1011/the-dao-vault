@@ -13,6 +13,8 @@ pub struct NcnSlashProposalTicket {
 
     pub slash_proposal: Pubkey,
 
+    pub resolver: Pubkey,
+
     /// The bump seed for the PDA
     pub bump: u8,
     // Reserved space
@@ -30,6 +32,7 @@ impl NcnSlashProposalTicket {
         Self {
             ncn,
             slash_proposal,
+            resolver: Pubkey::default(),
             bump,
             // reserved: [0; 263],
         }
