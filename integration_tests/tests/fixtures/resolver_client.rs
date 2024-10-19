@@ -293,6 +293,7 @@ impl ResolverProgramClient {
             &[resolver_sdk::sdk::propose_slash(
                 &resolver_program::id(),
                 &Config::find_program_address(&resolver_program::id()).0,
+                &NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0,
                 ncn,
                 operator,
                 slasher,

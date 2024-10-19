@@ -111,6 +111,7 @@ pub fn initialize_slasher(
 pub fn propose_slash(
     program_id: &Pubkey,
     config: &Pubkey,
+    ncn_resolver_program_config: &Pubkey,
     ncn: &Pubkey,
     operator: &Pubkey,
     slasher: &Pubkey,
@@ -121,6 +122,7 @@ pub fn propose_slash(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn_resolver_program_config, false),
         AccountMeta::new_readonly(*ncn, false),
         AccountMeta::new_readonly(*operator, false),
         AccountMeta::new_readonly(*slasher, false),

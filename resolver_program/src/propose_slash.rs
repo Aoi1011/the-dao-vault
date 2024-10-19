@@ -5,8 +5,9 @@ use jito_jsm_core::{
 };
 use jito_restaking_core::{ncn::Ncn, operator::Operator};
 use resolver_core::{
-    config::Config, ncn_slash_proposal_ticket::NcnSlashProposalTicket,
-    slash_proposal::SlashProposal, slasher::Slasher,
+    config::Config, ncn_resolver_program_config::NcnResolverProgramConfig,
+    ncn_slash_proposal_ticket::NcnSlashProposalTicket, slash_proposal::SlashProposal,
+    slasher::Slasher,
 };
 use resolver_sdk::error::ResolverError;
 use solana_program::{
@@ -19,15 +20,25 @@ pub fn process_propose_slash(
     accounts: &[AccountInfo],
     slash_amount: u64,
 ) -> ProgramResult {
-    let [config, ncn_info, operator_info, slasher_info, slash_proposal_info, ncn_slash_proposal_ticket_info, slasher_admin, system_program] =
+    let [config_info, ncn_resolver_program_config_info, ncn_info, operator_info, slasher_info, slash_proposal_info, ncn_slash_proposal_ticket_info, slasher_admin, system_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
-    Config::load(program_id, config, false)?;
-    let config_data = config.data.borrow();
+    Config::load(program_id, config_info, false)?;
+    let config_data = config_info.data.borrow();
     let config = Config::try_from_slice_unchecked(&config_data)?;
+
+    NcnResolverProgramConfig::load(
+        program_id,
+        ncn_resolver_program_config_info,
+        ncn_info,
+        false,
+    )?;
+    let ncn_resolver_program_config_data = ncn_resolver_program_config_info.data.borrow();
+    let ncn_resolver_program_config =
+        NcnResolverProgramConfig::try_from_slice_unchecked(&ncn_resolver_program_config_data)?;
 
     Ncn::load(&config.jito_restaking_program, ncn_info, false)?;
     Operator::load(&config.jito_restaking_program, operator_info, false)?;
@@ -80,13 +91,12 @@ pub fn process_propose_slash(
         slash_proposal_data[0] = SlashProposal::DISCRIMINATOR;
         let slash_proposal = SlashProposal::try_from_slice_unchecked_mut(&mut slash_proposal_data)?;
 
-        // TODO: veto_deadline_slot
         *slash_proposal = SlashProposal::new(
             *operator_info.key,
             *slasher_info.key,
             slash_amount,
             current_slot,
-            current_slot + 10,
+            current_slot + ncn_resolver_program_config.veto_duration(),
             slash_proposal_bump,
         );
     }
