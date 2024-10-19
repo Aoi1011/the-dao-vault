@@ -8,8 +8,10 @@ use solana_sdk::{
 };
 use spl_associated_token_account::instruction::create_associated_token_account_idempotent;
 
+use crate::resolver::VETO_DURATION;
+
 use super::{
-    resolver_client::ResolverProgramClient,
+    resolver_client::{ResolverProgramClient, SlasherRoot},
     restaking_client::{NcnRoot, OperatorRoot, RestakingProgramClient},
     vault_client::{VaultProgramClient, VaultRoot},
     TestResult,
@@ -28,6 +30,7 @@ impl std::fmt::Debug for TestBuilder {
 pub struct ConfiguredVault {
     #[allow(dead_code)]
     pub vault_program_client: VaultProgramClient,
+    #[allow(dead_code)]
     pub restaking_program_client: RestakingProgramClient,
     #[allow(dead_code)]
     pub vault_config_admin: Keypair,
@@ -37,7 +40,7 @@ pub struct ConfiguredVault {
     pub ncn_root: NcnRoot,
     pub operator_roots: Vec<OperatorRoot>,
     #[allow(dead_code)]
-    pub slashers_amounts: Vec<(Keypair, u64)>,
+    pub slashers_amounts: Vec<(SlasherRoot, u64)>,
 }
 
 impl TestBuilder {
@@ -150,6 +153,7 @@ impl TestBuilder {
     ) -> TestResult<ConfiguredVault> {
         let mut vault_program_client = self.vault_program_client();
         let mut restaking_program_client = self.restaking_program_client();
+        let mut resolver_program_client = self.resolver_program_client();
 
         let (vault_config_admin, vault_root) = vault_program_client
             .setup_config_and_vault(deposit_fee_bps, withdrawal_fee_bps, reward_fee_bps)
@@ -208,16 +212,38 @@ impl TestBuilder {
             operator_roots.push(operator_root);
         }
 
-        let mut slashers_amounts: Vec<(Keypair, u64)> = Vec::with_capacity(slasher_amounts.len());
+        resolver_program_client
+            .do_initialize_config()
+            .await
+            .unwrap();
+
+        resolver_program_client
+            .do_initialize_ncn_resolver_program_config(
+                &resolver_core::config::Config::find_program_address(&resolver_program::id()).0,
+                &ncn_root.ncn_pubkey,
+                &ncn_root.ncn_admin,
+                VETO_DURATION,
+            )
+            .await
+            .unwrap();
+
+        let mut slashers_amounts: Vec<(SlasherRoot, u64)> =
+            Vec::with_capacity(slasher_amounts.len());
         for amount in slasher_amounts {
-            let slasher = Keypair::new();
-            self.transfer(&slasher.pubkey(), 10.0).await?;
+            // let slasher = Keypair::new();
+            // self.transfer(&slasher.pubkey(), 10.0).await?;
+
+            let slasher_root = self
+                .resolver_program_client()
+                .do_initialize_slasher(&ncn_root)
+                .await
+                .unwrap();
 
             restaking_program_client
                 .do_initialize_ncn_vault_slasher_ticket(
                     &ncn_root,
                     &vault_root.vault_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                     *amount,
                 )
                 .await?;
@@ -226,7 +252,7 @@ impl TestBuilder {
                 .do_warmup_ncn_vault_slasher_ticket(
                     &ncn_root,
                     &vault_root.vault_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                 )
                 .await?;
 
@@ -234,7 +260,7 @@ impl TestBuilder {
                 .do_initialize_vault_ncn_slasher_ticket(
                     &vault_root,
                     &ncn_root.ncn_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                 )
                 .await?;
             self.warp_slot_incremental(1).await.unwrap();
@@ -242,11 +268,11 @@ impl TestBuilder {
                 .do_warmup_vault_ncn_slasher_ticket(
                     &vault_root,
                     &ncn_root.ncn_pubkey,
-                    &slasher.pubkey(),
+                    &slasher_root.slasher_pubkey,
                 )
                 .await?;
 
-            slashers_amounts.push((slasher, *amount));
+            slashers_amounts.push((slasher_root, *amount));
         }
 
         Ok(ConfiguredVault {

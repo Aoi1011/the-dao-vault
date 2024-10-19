@@ -5,8 +5,9 @@ use jito_jsm_core::{
 };
 use jito_restaking_core::{ncn::Ncn, operator::Operator};
 use resolver_core::{
-    config::Config, ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
-    slash_proposal::SlashProposal,
+    config::Config, ncn_resolver_program_config::NcnResolverProgramConfig,
+    ncn_slash_proposal_ticket::NcnSlashProposalTicket, slash_proposal::SlashProposal,
+    slasher::Slasher,
 };
 use resolver_sdk::error::ResolverError;
 use solana_program::{
@@ -19,19 +20,32 @@ pub fn process_propose_slash(
     accounts: &[AccountInfo],
     slash_amount: u64,
 ) -> ProgramResult {
-    let [config, ncn, operator, resolver, slash_proposal_info, ncn_slash_proposal_ticket_info, slasher_admin, system_program] =
+    let [config_info, ncn_resolver_program_config_info, ncn_info, operator_info, slasher_info, slash_proposal_info, ncn_slash_proposal_ticket_info, slasher_admin, system_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
-    Config::load(program_id, config, false)?;
-    let config_data = config.data.borrow();
+    Config::load(program_id, config_info, false)?;
+    let config_data = config_info.data.borrow();
     let config = Config::try_from_slice_unchecked(&config_data)?;
 
-    Ncn::load(&config.jito_restaking_program, ncn, false)?;
-    Operator::load(&config.jito_restaking_program, operator, false)?;
-    Resolver::load(program_id, resolver, false)?;
+    NcnResolverProgramConfig::load(
+        program_id,
+        ncn_resolver_program_config_info,
+        ncn_info,
+        false,
+    )?;
+    let ncn_resolver_program_config_data = ncn_resolver_program_config_info.data.borrow();
+    let ncn_resolver_program_config =
+        NcnResolverProgramConfig::try_from_slice_unchecked(&ncn_resolver_program_config_data)?;
+
+    Ncn::load(&config.jito_restaking_program, ncn_info, false)?;
+    Operator::load(&config.jito_restaking_program, operator_info, false)?;
+
+    Slasher::load(program_id, slasher_info, false)?;
+    let slasher_data = slasher_info.data.borrow();
+    let slasher = Slasher::try_from_slice_unchecked(&slasher_data)?;
 
     load_system_account(slash_proposal_info, true)?;
     load_system_account(ncn_slash_proposal_ticket_info, true)?;
@@ -40,10 +54,17 @@ pub fn process_propose_slash(
 
     let current_slot = Clock::get()?.slot;
 
+    slasher.check_admin(slasher_admin.key)?;
+
     // Initialize SlashProposal
     {
         let (slash_proposal_pubkey, slash_proposal_bump, mut slash_proposal_seed) =
-            SlashProposal::find_program_address(program_id, ncn.key, operator.key, resolver.key);
+            SlashProposal::find_program_address(
+                program_id,
+                ncn_info.key,
+                operator_info.key,
+                slasher_info.key,
+            );
         slash_proposal_seed.push(vec![slash_proposal_bump]);
         if slash_proposal_info.key.ne(&slash_proposal_pubkey) {
             msg!("SlashProposal account is not at the correct PDA");
@@ -70,13 +91,12 @@ pub fn process_propose_slash(
         slash_proposal_data[0] = SlashProposal::DISCRIMINATOR;
         let slash_proposal = SlashProposal::try_from_slice_unchecked_mut(&mut slash_proposal_data)?;
 
-        // TODO: veto_deadline_slot
         *slash_proposal = SlashProposal::new(
-            *operator.key,
-            *resolver.key,
+            *operator_info.key,
+            *slasher_info.key,
             slash_amount,
             current_slot,
-            current_slot + 10,
+            current_slot + ncn_resolver_program_config.veto_duration(),
             slash_proposal_bump,
         );
     }
@@ -84,7 +104,7 @@ pub fn process_propose_slash(
     // Initialize NcnSlashProposalTicket
     {
         let (ncn_slash_proposal_pubkey, ncn_slash_proposal_bump, mut ncn_slash_proposal_seed) =
-            NcnSlashProposalTicket::find_program_address(program_id, ncn.key);
+            NcnSlashProposalTicket::find_program_address(program_id, ncn_info.key);
         ncn_slash_proposal_seed.push(vec![ncn_slash_proposal_bump]);
         if ncn_slash_proposal_ticket_info
             .key
@@ -116,7 +136,7 @@ pub fn process_propose_slash(
             NcnSlashProposalTicket::try_from_slice_unchecked_mut(&mut ncn_slash_proposal_data)?;
 
         *ncn_slash_proposal = NcnSlashProposalTicket::new(
-            *ncn.key,
+            *ncn_info.key,
             *slash_proposal_info.key,
             ncn_slash_proposal_bump,
         );

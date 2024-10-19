@@ -51,6 +51,13 @@ impl Slasher {
         Vec::from_iter([b"slasher".to_vec(), base.as_ref().to_vec()])
     }
 
+    /// Returns the seeds for the PDA used for signing
+    pub fn signing_seeds(&self) -> Vec<Vec<u8>> {
+        let mut slasher_seeds = Self::seeds(&self.base);
+        slasher_seeds.push(vec![self.bump]);
+        slasher_seeds
+    }
+
     pub fn find_program_address(program_id: &Pubkey, base: &Pubkey) -> (Pubkey, u8, Vec<Vec<u8>>) {
         let seeds = Self::seeds(base);
         let seeds_iter: Vec<_> = seeds.iter().map(|s| s.as_slice()).collect();

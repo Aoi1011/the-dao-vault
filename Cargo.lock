@@ -3214,6 +3214,7 @@ dependencies = [
  "jito-jsm-core",
  "jito-restaking-core",
  "jito-vault-core",
+ "jito-vault-program",
  "jito-vault-sdk",
  "resolver-core",
  "resolver-sdk",

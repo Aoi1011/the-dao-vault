@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use resolver_core::{config::Config, slash_proposal::SlashProposal};
+    use resolver_core::slash_proposal::SlashProposal;
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
-        resolver::{MAX_SLASH_AMOUNT, VETO_DURATION},
+        resolver::MAX_SLASH_AMOUNT,
     };
 
     #[tokio::test]
@@ -38,52 +38,57 @@ mod tests {
             .await
             .unwrap();
 
-        resolver_program_client
-            .do_initialize_config()
-            .await
-            .unwrap();
+        let slasher_root = &slashers_amounts[0].0;
 
-        resolver_program_client
-            .do_initialize_ncn_resolver_program_config(
-                &Config::find_program_address(&resolver_program::id()).0,
-                &ncn_root.ncn_pubkey,
-                &ncn_root.ncn_admin,
-                VETO_DURATION,
-            )
-            .await
-            .unwrap();
+        // resolver_program_client
+        //     .do_initialize_config()
+        //     .await
+        //     .unwrap();
+
+        // resolver_program_client
+        //     .do_initialize_ncn_resolver_program_config(
+        //         &Config::find_program_address(&resolver_program::id()).0,
+        //         &ncn_root.ncn_pubkey,
+        //         &ncn_root.ncn_admin,
+        //         VETO_DURATION,
+        //     )
+        //     .await
+        //     .unwrap();
 
         let resolver_root = resolver_program_client
             .do_initialize_resolver(&ncn_root)
             .await
             .unwrap();
 
+        //         let slasher_root = resolver_program_client
+        //             .do_initialize_slasher(&ncn_root)
+        //             .await
+        //             .unwrap();
+
         resolver_program_client
             .do_propose_slash(
                 &ncn_root.ncn_pubkey,
                 &operator_roots[0].operator_pubkey,
-                &resolver_root.resolver_pubkey,
-                &slashers_amounts[0].0,
+                &slasher_root,
                 100,
             )
             .await
             .unwrap();
 
+        let slash_proposal_pubkey = SlashProposal::find_program_address(
+            &resolver_program::id(),
+            &ncn_root.ncn_pubkey,
+            &operator_roots[0].operator_pubkey,
+            &slasher_root.slasher_pubkey,
+        )
+        .0;
         let slash_proposal: SlashProposal = resolver_program_client
-            .get_account(
-                &SlashProposal::find_program_address(
-                    &resolver_program::id(),
-                    &ncn_root.ncn_pubkey,
-                    &operator_roots[0].operator_pubkey,
-                    &resolver_root.resolver_pubkey,
-                )
-                .0,
-            )
+            .get_account(&slash_proposal_pubkey)
             .await
             .unwrap();
 
         assert_eq!(slash_proposal.operator, operator_roots[0].operator_pubkey);
-        assert_eq!(slash_proposal.resolver, resolver_root.resolver_pubkey);
+        assert_eq!(slash_proposal.slasher, slasher_root.slasher_pubkey);
         assert_eq!(slash_proposal.amount(), 100);
         assert!(!slash_proposal.completed());
 
@@ -91,6 +96,7 @@ mod tests {
             .do_veto_slash(
                 &ncn_root.ncn_pubkey,
                 &operator_roots[0].operator_pubkey,
+                &slasher_root,
                 &resolver_root.resolver_pubkey,
                 &resolver_root.resolver_admin,
             )
@@ -98,20 +104,12 @@ mod tests {
             .unwrap();
 
         let slash_proposal: SlashProposal = resolver_program_client
-            .get_account(
-                &SlashProposal::find_program_address(
-                    &resolver_program::id(),
-                    &ncn_root.ncn_pubkey,
-                    &operator_roots[0].operator_pubkey,
-                    &resolver_root.resolver_pubkey,
-                )
-                .0,
-            )
+            .get_account(&slash_proposal_pubkey)
             .await
             .unwrap();
 
         assert_eq!(slash_proposal.operator, operator_roots[0].operator_pubkey);
-        assert_eq!(slash_proposal.resolver, resolver_root.resolver_pubkey);
+        assert_eq!(slash_proposal.slasher, slasher_root.slasher_pubkey);
         assert_eq!(slash_proposal.amount(), 100);
         assert!(slash_proposal.completed());
     }

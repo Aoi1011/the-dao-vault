@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use resolver_core::{config::Config, ncn_resolver_program_config::NcnResolverProgramConfig};
+    use resolver_core::ncn_resolver_program_config::NcnResolverProgramConfig;
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
@@ -37,20 +37,20 @@ mod tests {
             .await
             .unwrap();
 
-        resolver_program_client
-            .do_initialize_config()
-            .await
-            .unwrap();
+        // resolver_program_client
+        //     .do_initialize_config()
+        //     .await
+        //     .unwrap();
 
-        resolver_program_client
-            .do_initialize_ncn_resolver_program_config(
-                &Config::find_program_address(&resolver_program::id()).0,
-                &ncn_root.ncn_pubkey,
-                &ncn_root.ncn_admin,
-                VETO_DURATION,
-            )
-            .await
-            .unwrap();
+        // resolver_program_client
+        //     .do_initialize_ncn_resolver_program_config(
+        //         &Config::find_program_address(&resolver_program::id()).0,
+        //         &ncn_root.ncn_pubkey,
+        //         &ncn_root.ncn_admin,
+        //         VETO_DURATION,
+        //     )
+        //     .await
+        //     .unwrap();
 
         let ncn_resolver_program_config: NcnResolverProgramConfig = resolver_program_client
             .get_account(

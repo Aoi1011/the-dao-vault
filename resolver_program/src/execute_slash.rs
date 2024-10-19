@@ -13,15 +13,15 @@ use jito_vault_core::{
 use jito_vault_sdk::error::VaultError;
 use resolver_core::{
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
-    slash_proposal::SlashProposal,
+    slash_proposal::SlashProposal, slasher::Slasher,
 };
 use solana_program::{
-    account_info::AccountInfo, clock::Clock, entrypoint::ProgramResult, program::invoke,
-    program_error::ProgramError, pubkey::Pubkey, sysvar::Sysvar,
+    account_info::AccountInfo, clock::Clock, entrypoint::ProgramResult, msg,
+    program::invoke_signed, program_error::ProgramError, pubkey::Pubkey, sysvar::Sysvar,
 };
 
 pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
-    let [config_info, vault_config_info, ncn_info, operator_info, vault_info, slasher_admin_info, ncn_operator_state_info, ncn_vault_ticket_info, operator_vault_ticket_info, vault_ncn_ticket_info, vault_operator_delegation_info, ncn_vault_slasher_ticket_info, vault_ncn_slasher_ticket_info, vault_ncn_slasher_operator_ticket_info, vault_token_account_info, slasher_token_account_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, jito_vault_program, token_program] =
+    let [config_info, vault_config_info, ncn_info, operator_info, slasher_info, vault_info, slasher_admin_info, ncn_operator_state_info, ncn_vault_ticket_info, operator_vault_ticket_info, vault_ncn_ticket_info, vault_operator_delegation_info, ncn_vault_slasher_ticket_info, vault_ncn_slasher_ticket_info, vault_ncn_slasher_operator_ticket_info, vault_token_account_info, slasher_token_account_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, token_program, jito_vault_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -39,6 +39,10 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     jito_vault_core::config::Config::load(&config.jito_vault_program, vault_config_info, false)?;
     Ncn::load(&config.jito_restaking_program, ncn_info, false)?;
     Operator::load(&config.jito_restaking_program, operator_info, false)?;
+
+    Slasher::load(program_id, slasher_info, false)?;
+    let slasher_data = slasher_info.data.borrow();
+    let slasher = Slasher::try_from_slice_unchecked(&slasher_data)?;
 
     Vault::load(&config.jito_vault_program, vault_info, true)?;
     let vault_data = vault_info.data.borrow();
@@ -85,7 +89,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         ncn_vault_slasher_ticket_info,
         ncn_info,
         vault_info,
-        slasher_admin_info,
+        slasher_info,
         false,
     )?;
     VaultNcnSlasherTicket::load(
@@ -93,7 +97,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         vault_ncn_slasher_ticket_info,
         vault_info,
         ncn_info,
-        slasher_admin_info,
+        slasher_info,
         false,
     )?;
     VaultNcnSlasherOperatorTicket::load(
@@ -101,7 +105,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         vault_ncn_slasher_operator_ticket_info,
         vault_info,
         ncn_info,
-        slasher_admin_info,
+        slasher_info,
         operator_info,
         ncn_epoch,
         true,
@@ -114,7 +118,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     )?;
     load_associated_token_account(
         slasher_token_account_info,
-        slasher_admin_info.key,
+        slasher_info.key,
         &vault.supported_mint,
     )?;
 
@@ -127,7 +131,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         slash_proposal_info,
         ncn_info,
         operator_info,
-        resolver_info,
+        slasher_info,
         false,
     )?;
     let mut slash_proposal_data = slash_proposal_info.data.borrow_mut();
@@ -138,15 +142,25 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     let _ncn_slash_proposal_ticket =
         NcnSlashProposalTicket::try_from_slice_unchecked(&ncn_slash_proposal_ticket_data)?;
 
-    // load_system_program(system_program)?;
     load_token_program(token_program)?;
+
+    if jito_vault_program.key.ne(&jito_vault_program::id()) {
+        msg!("jito vault program account is incorrect");
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    slasher.check_admin(slasher_admin_info.key)?;
 
     slash_proposal.check_veto_period_not_ended(Clock::get()?.slot)?;
     slash_proposal.check_completed()?;
 
     slash_proposal.set_completed(true);
 
+    let slasher_seeds = slasher.signing_seeds();
+    let seed_slices: Vec<&[u8]> = slasher_seeds.iter().map(|seed| seed.as_slice()).collect();
+
     drop(vault_data);
+    drop(slasher_data);
 
     let ix = jito_vault_sdk::sdk::slash(
         &config.jito_vault_program,
@@ -154,7 +168,7 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         vault_info.key,
         ncn_info.key,
         operator_info.key,
-        slasher_admin_info.key,
+        slasher_info.key,
         ncn_operator_state_info.key,
         ncn_vault_ticket_info.key,
         operator_vault_ticket_info.key,
@@ -168,14 +182,14 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
         slash_proposal.amount(),
     );
 
-    invoke(
+    invoke_signed(
         &ix,
         &[
             vault_config_info.clone(),
             vault_info.clone(),
             ncn_info.clone(),
             operator_info.clone(),
-            slasher_admin_info.clone(),
+            slasher_info.clone(),
             ncn_operator_state_info.clone(),
             ncn_vault_ticket_info.clone(),
             operator_vault_ticket_info.clone(),
@@ -186,9 +200,9 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
             vault_ncn_slasher_operator_ticket_info.clone(),
             vault_token_account_info.clone(),
             slasher_token_account_info.clone(),
-            jito_vault_program.clone(),
             token_program.clone(),
         ],
+        &[&seed_slices],
     )?;
 
     Ok(())
