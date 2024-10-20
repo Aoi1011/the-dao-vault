@@ -7,8 +7,25 @@ pub enum ResolverInstruction {
     InitializeNcnResolverProgramConfig {
         veto_duration: u64,
     },
-    InitializeResolver,
+
+    #[account(0, name = "config")]
+    #[account(1, name = "ncn")]
+    #[account(2, writable, name = "slasher")]
+    #[account(3, writable, signer, name = "admin")]
+    #[account(4, signer, name = "base")]
+    #[account(5, name = "system_program")]
     InitializeSlasher,
+
+    #[account(0, name = "config")]
+    #[account(1, writable, name = "ncn_resolver_program_config")]
+    #[account(2, name = "ncn")]
+    #[account(3, writable, name = "resolver")]
+    #[account(4, writable, signer, name = "admin")]
+    #[account(5, signer, name = "base")]
+    #[account(6, name = "system_program")]
+    InitializeResolver,
+
+
     ProposeSlash {
         slash_amount: u64,
     },
