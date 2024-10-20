@@ -47,6 +47,16 @@ pub enum ResolverInstruction {
     #[account(6, signer, name = "ncn_slasher_admin")]
     #[account(7, name = "new_resolver_info")]
     SetResolver,
+
+    #[account(0, name = "config")]
+    #[account(1, name = "ncn")]
+    #[account(2, name = "operator")]
+    #[account(3, name = "slasher")]
+    #[account(4, name = "resolver")]
+    #[account(5, writable, name = "slash_proposal")]
+    #[account(6, writable, name = "ncn_slash_proposal_ticket")]
+    #[account(7, signer, name = "resolver_admin")]
+    #[account(8, name = "system_program")]
     VetoSlash,
     ExecuteSlash,
 

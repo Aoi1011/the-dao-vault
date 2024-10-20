@@ -58,6 +58,8 @@ The slasher does not decide whether a slash should happen—it only performs the
 
 5. Veto the Slash
 
+![veto_slash](./docs/veto_slash.png)
+
 6. Execute the Slash
 
 ## Getting started
