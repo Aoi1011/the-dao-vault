@@ -38,6 +38,32 @@ If the resolver approves the slash, the slasher enforces it by penalizing the of
 2. No decision-making:
 The slasher does not decide whether a slash should happen—it only performs the action of slashing based on the resolver’s decision.
 
+## Flow
+
+1. Initialize a Slasher
+
+![initialize_slasher](./docs/initialize_slasher.png)
+
+2. Initialize a Resolver
+
+![initialize_resolver](./docs/initialize_resolver.png)
+
+3. Propose a slash
+
+![propose_slash](./docs/propose_slash.png)
+
+4. Set the resolver
+
+![set_resolver](./docs/set_resolver.png)
+
+5. Veto the Slash
+
+![veto_slash](./docs/veto_slash.png)
+
+6. Execute the Slash
+
+![execute_slash](./docs/execute_slash.png)
+
 ## Getting started
 
 ### Build
