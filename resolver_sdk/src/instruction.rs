@@ -58,6 +58,28 @@ pub enum ResolverInstruction {
     #[account(7, signer, name = "resolver_admin")]
     #[account(8, name = "system_program")]
     VetoSlash,
+
+    #[account(0, name = "config")]
+    #[account(1, name = "vault_config")]
+    #[account(2, name = "ncn")]
+    #[account(3, name = "operator")]
+    #[account(4, name = "slasher")]
+    #[account(5, writable, name = "vault")]
+    #[account(6, signer, name = "slasher_admin")]
+    #[account(7, name = "ncn_operator_state")]
+    #[account(8, name = "ncn_vault_ticket")]
+    #[account(9, name = "vault_ncn_ticket")]
+    #[account(10, writable, name = "vault_operator_delegation")]
+    #[account(11, name = "ncn_vault_slasher_ticket")]
+    #[account(12, name = "vault_ncn_slasker_ticket")]
+    #[account(13, writable, name = "vault_ncn_slasher_operator_ticket")]
+    #[account(14, writable, name = "vault_token_account")]
+    #[account(15, writable, name = "slasher_token_account")]
+    #[account(16, name = "resolver")]
+    #[account(17, writable, name = "slash_proposal")]
+    #[account(18, writable, name = "ncn_slash_proposal_ticket")]
+    #[account(19, name = "token_program")]
+    #[account(20, name = "jito_vault_program")]
     ExecuteSlash,
 
     #[account(0, name = "slasher")]

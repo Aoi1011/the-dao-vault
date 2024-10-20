@@ -62,6 +62,8 @@ The slasher does not decide whether a slash should happen—it only performs the
 
 6. Execute the Slash
 
+![execute_slash](./docs/execute_slash.png)
+
 ## Getting started
 
 ### Build
