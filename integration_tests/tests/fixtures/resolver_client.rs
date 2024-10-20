@@ -13,18 +13,21 @@ use resolver_core::{
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
     slash_proposal::SlashProposal, slasher::Slasher,
 };
-use resolver_sdk::instruction::SlasherAdminRole;
+use resolver_sdk::{error::ResolverError, instruction::SlasherAdminRole};
 use solana_program::{
-    clock::Clock, native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer,
+    clock::Clock, instruction::InstructionError, native_token::sol_to_lamports, pubkey::Pubkey,
+    system_instruction::transfer,
 };
 use solana_program_test::BanksClient;
 use solana_sdk::{
-    commitment_config::CommitmentLevel, signature::Keypair, signer::Signer,
-    transaction::Transaction,
+    commitment_config::CommitmentLevel,
+    signature::Keypair,
+    signer::Signer,
+    transaction::{Transaction, TransactionError},
 };
 use spl_associated_token_account::get_associated_token_address;
 
-use super::{restaking_client::NcnRoot, vault_client::VaultRoot, TestResult};
+use super::{restaking_client::NcnRoot, vault_client::VaultRoot, TestError, TestResult};
 
 #[derive(Debug)]
 pub struct ResolverRoot {
@@ -689,4 +692,14 @@ impl ResolverProgramClient {
             .await?;
         Ok(())
     }
+}
+
+#[inline(always)]
+#[track_caller]
+pub fn assert_resolver_error<T>(test_error: Result<T, TestError>, resolver_error: ResolverError) {
+    assert!(test_error.is_err());
+    assert_eq!(
+        test_error.err().unwrap().to_transaction_error().unwrap(),
+        TransactionError::InstructionError(0, InstructionError::Custom(resolver_error as u32))
+    );
 }
