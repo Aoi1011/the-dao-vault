@@ -61,8 +61,7 @@ The SlashProposer calls `propose_slash` ix with some arguments such as `operator
 
 4. Set the resolver
 
-The Slasher_admin set the Resolver that is taking care of the SlashProposal.
-`slasher_admin` should be [NCN slasher_admin](https://github.com/jito-foundation/restaking/blob/f2cad7bd07420bfb23b381d7c293ea2c034df473/restaking_core/src/ncn.rs#L31).
+The Resolver admin sets the Resolver that is taking care of the SlashProposal.
 
 ![set_resolver](./docs/images/set_resolver.png)
 
