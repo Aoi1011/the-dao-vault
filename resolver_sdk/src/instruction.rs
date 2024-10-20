@@ -25,10 +25,27 @@ pub enum ResolverInstruction {
     #[account(6, name = "system_program")]
     InitializeResolver,
 
-
+    #[account(0, name = "config")]
+    #[account(1, name = "ncn_resolver_program_config")]
+    #[account(2, name = "ncn")]
+    #[account(3, name = "operator")]
+    #[account(4, name = "slasher")]
+    #[account(5, writable, name = "slash_proposal")]
+    #[account(6, writable, name = "ncn_slash_proposal_ticket")]
+    #[account(7, writable, signer, name = "slasher_admin")]
+    #[account(8, name = "system_program")]
     ProposeSlash {
         slash_amount: u64,
     },
+
+    #[account(0, name = "config")]
+    #[account(1, name = "ncn")]
+    #[account(2, name = "operator")]
+    #[account(3, name = "slasher")]
+    #[account(4, name = "slash_proposal")]
+    #[account(5, writable, name = "ncn_slash_proposal_ticket")]
+    #[account(6, signer, name = "ncn_slasher_admin")]
+    #[account(7, name = "new_resolver_info")]
     SetResolver,
     VetoSlash,
     ExecuteSlash,

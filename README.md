@@ -50,7 +50,11 @@ The slasher does not decide whether a slash should happen—it only performs the
 
 3. Propose a slash
 
+![propose_slash](./docs/propose_slash.png)
+
 4. Set the resolver
+
+![set_resolver](./docs/set_resolver.png)
 
 5. Veto the Slash
 
