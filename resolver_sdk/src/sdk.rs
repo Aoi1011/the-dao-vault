@@ -257,3 +257,29 @@ pub fn execute_slash(
         data: ResolverInstruction::ExecuteSlash.try_to_vec().unwrap(),
     }
 }
+
+pub fn slasher_delegate_token_account(
+    program_id: &Pubkey,
+    slasher: &Pubkey,
+    delegate_admin: &Pubkey,
+    token_mint: &Pubkey,
+    token_account: &Pubkey,
+    delegate: &Pubkey,
+    token_program: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*slasher, false),
+        AccountMeta::new_readonly(*delegate_admin, true),
+        AccountMeta::new(*token_mint, false),
+        AccountMeta::new(*token_account, false),
+        AccountMeta::new_readonly(*delegate, false),
+        AccountMeta::new_readonly(*token_program, false),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::SlasherDelegateTokenAccount
+            .try_to_vec()
+            .unwrap(),
+    }
+}

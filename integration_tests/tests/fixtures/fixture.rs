@@ -6,7 +6,10 @@ use solana_sdk::{
     commitment_config::CommitmentLevel, signature::Keypair, signer::Signer,
     transaction::Transaction,
 };
-use spl_associated_token_account::instruction::create_associated_token_account_idempotent;
+use spl_associated_token_account::{
+    get_associated_token_address, instruction::create_associated_token_account_idempotent,
+};
+use spl_token_2022::extension::{ExtensionType, StateWithExtensionsOwned};
 
 use crate::resolver::VETO_DURATION;
 
@@ -124,6 +127,177 @@ impl TestBuilder {
                 CommitmentLevel::Processed,
             )
             .await
+    }
+
+    pub async fn create_token_account(
+        &mut self,
+        token_program_id: &Pubkey,
+        account: &Keypair,
+        pool_mint: &Pubkey,
+        owner: &Pubkey,
+        extensions: &[ExtensionType],
+    ) -> Result<(), BanksClientError> {
+        let blockhash = self.context.banks_client.get_latest_blockhash().await?;
+        let rent = self.context.banks_client.get_rent().await?;
+        let space =
+            ExtensionType::try_calculate_account_len::<spl_token_2022::state::Account>(extensions)
+                .map_err(|_e| {
+                    BanksClientError::ClientError("failed to try calculate account length")
+                })?;
+        let account_rent = rent.minimum_balance(space);
+
+        let mut instructions = vec![solana_program::system_instruction::create_account(
+            &self.context.payer.pubkey(),
+            &account.pubkey(),
+            account_rent,
+            space as u64,
+            token_program_id,
+        )];
+
+        for extension in extensions {
+            match extension {
+                ExtensionType::ImmutableOwner => instructions.push(
+                    spl_token_2022::instruction::initialize_immutable_owner(
+                        token_program_id,
+                        &account.pubkey(),
+                    )
+                    .unwrap(),
+                ),
+                ExtensionType::TransferFeeAmount
+                | ExtensionType::MemoTransfer
+                | ExtensionType::CpiGuard
+                | ExtensionType::NonTransferableAccount => (),
+                _ => unimplemented!(),
+            };
+        }
+
+        instructions.push(
+            spl_token_2022::instruction::initialize_account(
+                token_program_id,
+                &account.pubkey(),
+                pool_mint,
+                owner,
+            )
+            .map_err(|_e| BanksClientError::ClientError("failed to initialize account"))?,
+        );
+
+        let mut signers = vec![&self.context.payer, account];
+        for extension in extensions {
+            match extension {
+                ExtensionType::MemoTransfer => {
+                    signers.push(&self.context.payer);
+                    instructions.push(
+                spl_token_2022::extension::memo_transfer::instruction::enable_required_transfer_memos(
+                    token_program_id,
+                    &account.pubkey(),
+                    &self.context.payer.pubkey(),
+                    &[],
+                ).map_err(|_e| BanksClientError::ClientError("failed to enable required transfer memos"))?
+                )
+                }
+                ExtensionType::CpiGuard => {
+                    signers.push(&self.context.payer);
+                    instructions.push(
+                        spl_token_2022::extension::cpi_guard::instruction::enable_cpi_guard(
+                            token_program_id,
+                            &account.pubkey(),
+                            &self.context.payer.pubkey(),
+                            &[],
+                        )
+                        .map_err(|_e| {
+                            BanksClientError::ClientError("failed to enable cpi guard")
+                        })?,
+                    )
+                }
+                ExtensionType::ImmutableOwner
+                | ExtensionType::TransferFeeAmount
+                | ExtensionType::NonTransferableAccount => (),
+                _ => unimplemented!(),
+            }
+        }
+
+        let transaction = Transaction::new_signed_with_payer(
+            &instructions,
+            Some(&self.context.payer.pubkey()),
+            &signers,
+            blockhash,
+        );
+
+        self.context
+            .banks_client
+            .process_transaction(transaction)
+            .await
+    }
+
+    /// Mints tokens to an ATA owned by the `to` address
+    pub async fn mint_spl_to(
+        &mut self,
+        mint: &Pubkey,
+        to: &Pubkey,
+        amount: u64,
+        token_program: &Pubkey,
+    ) -> Result<(), BanksClientError> {
+        let blockhash = self.context.banks_client.get_latest_blockhash().await?;
+
+        let mint_to_ix = if token_program.eq(&spl_token::id()) {
+            vec![
+                create_associated_token_account_idempotent(
+                    &self.context.payer.pubkey(),
+                    to,
+                    mint,
+                    token_program,
+                ),
+                spl_token::instruction::mint_to(
+                    token_program,
+                    mint,
+                    &get_associated_token_address(to, mint),
+                    &self.context.payer.pubkey(),
+                    &[],
+                    amount,
+                )
+                .map_err(|_e| BanksClientError::ClientError("failed to mint to"))?,
+            ]
+        } else {
+            vec![spl_token_2022::instruction::mint_to(
+                token_program,
+                mint,
+                to,
+                &self.context.payer.pubkey(),
+                &[],
+                amount,
+            )
+            .map_err(|_e| BanksClientError::ClientError("failed to mint to"))?]
+        };
+        self.context
+            .banks_client
+            .process_transaction_with_preflight_and_commitment(
+                Transaction::new_signed_with_payer(
+                    &mint_to_ix,
+                    Some(&self.context.payer.pubkey()),
+                    &[&self.context.payer],
+                    blockhash,
+                ),
+                CommitmentLevel::Processed,
+            )
+            .await
+    }
+
+    pub async fn get_token_account(
+        &mut self,
+        token_account: &Pubkey,
+    ) -> Result<spl_token_2022::state::Account, BanksClientError> {
+        let account = self
+            .context
+            .banks_client
+            .get_account(*token_account)
+            .await?
+            .ok_or(BanksClientError::ClientError("failed to get token account"))?;
+
+        let account_info =
+            StateWithExtensionsOwned::<spl_token_2022::state::Account>::unpack(account.data)
+                .map_err(|_e| BanksClientError::ClientError("failed to unpack"))?;
+
+        Ok(account_info.base)
     }
 
     pub async fn warp_slot_incremental(
