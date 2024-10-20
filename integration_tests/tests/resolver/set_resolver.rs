@@ -83,10 +83,9 @@ mod tests {
         let new_resolver = Keypair::new();
         resolver_program_client
             .do_set_resolver(
-                &ncn_root.ncn_pubkey,
+                &ncn_root,
                 &operator_roots[0].operator_pubkey,
                 &slasher_root,
-                &ncn_root.ncn_admin,
                 &new_resolver.pubkey(),
             )
             .await

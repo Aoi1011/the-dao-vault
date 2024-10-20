@@ -319,34 +319,33 @@ impl ResolverProgramClient {
 
     pub async fn do_set_resolver(
         &mut self,
-        ncn: &Pubkey,
+        ncn_root: &NcnRoot,
         operator: &Pubkey,
         slasher_root: &SlasherRoot,
-        ncn_slasher_admin: &Keypair,
         new_resolver_admin: &Pubkey,
     ) -> TestResult<()> {
         // create resolver + add operator vault
         let slash_proposal = SlashProposal::find_program_address(
             &resolver_program::id(),
-            &ncn,
+            &ncn_root.ncn_pubkey,
             &operator,
             &slasher_root.slasher_pubkey,
         )
         .0;
         let ncn_slash_proposal_ticket = NcnSlashProposalTicket::find_program_address(
             &resolver_program::id(),
-            ncn,
+            &ncn_root.ncn_pubkey,
             &slash_proposal,
         )
         .0;
 
         self.set_resolver(
-            ncn,
+            &ncn_root.ncn_pubkey,
             operator,
             &slasher_root.slasher_pubkey,
             &slash_proposal,
             &ncn_slash_proposal_ticket,
-            ncn_slasher_admin,
+            &ncn_root.ncn_admin,
             new_resolver_admin,
         )
         .await
@@ -359,7 +358,7 @@ impl ResolverProgramClient {
         slasher: &Pubkey,
         slash_proposal: &Pubkey,
         ncn_slash_proposal_ticket: &Pubkey,
-        ncn_slasher_admin: &Keypair,
+        ncn_resolver_admin: &Keypair,
         new_resolver_admin: &Pubkey,
     ) -> TestResult<()> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
@@ -368,16 +367,17 @@ impl ResolverProgramClient {
             &[resolver_sdk::sdk::set_resolver(
                 &resolver_program::id(),
                 &Config::find_program_address(&resolver_program::id()).0,
+                &NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0,
                 ncn,
                 operator,
                 slasher,
                 slash_proposal,
                 ncn_slash_proposal_ticket,
-                &ncn_slasher_admin.pubkey(),
+                &ncn_resolver_admin.pubkey(),
                 new_resolver_admin,
             )],
-            Some(&ncn_slasher_admin.pubkey()),
-            &[ncn_slasher_admin],
+            Some(&ncn_resolver_admin.pubkey()),
+            &[ncn_resolver_admin],
             blockhash,
         ))
         .await

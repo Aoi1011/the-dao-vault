@@ -44,39 +44,39 @@ The slasher does not decide whether a slash should happen—it only performs the
 
 A Slash Proposer register as a Slasher in Resolver program.
 
-![initialize_slasher](./docs/initialize_slasher.png)
+![initialize_slasher](./docs/images/initialize_slasher.png)
 
 2. Initialize a Resolver
 
 A Resolver register as a Resolver in Resolver program.
 
-![initialize_resolver](./docs/initialize_resolver.png)
+![initialize_resolver](./docs/images/initialize_resolver.png)
 
 3. Propose a slash
 
 The SlashProposer detects some concerns of the operator like downtime, misbehaving in NCN, SlashProposer propose a slash in Resolver program.
 The SlashProposer calls `propose_slash` ix with some arguments such as `operator`, `slash_amount`.
 
-![propose_slash](./docs/propose_slash.png)
+![propose_slash](./docs/images/propose_slash.png)
 
 4. Set the resolver
 
 The Slasher_admin set the Resolver that is taking care of the SlashProposal.
 `slasher_admin` should be [NCN slasher_admin](https://github.com/jito-foundation/restaking/blob/f2cad7bd07420bfb23b381d7c293ea2c034df473/restaking_core/src/ncn.rs#L31).
 
-![set_resolver](./docs/set_resolver.png)
+![set_resolver](./docs/images/set_resolver.png)
 
 5. Veto the Slash
 
 The Resolver can veto the SlashProposal if the SlashProposal is invalid.
 
-![veto_slash](./docs/veto_slash.png)
+![veto_slash](./docs/images/veto_slash.png)
 
 6. Execute the Slash
 
 Finally, after passing `veto_duration`, the SlashProposer can call `execute_slash` ix.
 
-![execute_slash](./docs/execute_slash.png)
+![execute_slash](./docs/images/execute_slash.png)
 
 ## Getting started
 
