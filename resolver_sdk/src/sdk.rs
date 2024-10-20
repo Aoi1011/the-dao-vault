@@ -5,7 +5,7 @@ use solana_program::{
     system_program,
 };
 
-use crate::instruction::ResolverInstruction;
+use crate::instruction::{ResolverInstruction, SlasherAdminRole};
 
 pub fn initialize_config(
     program_id: &Pubkey,
@@ -279,6 +279,45 @@ pub fn slasher_delegate_token_account(
         program_id: *program_id,
         accounts,
         data: ResolverInstruction::SlasherDelegateTokenAccount
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn slasher_set_admin(
+    program_id: &Pubkey,
+    slasher: &Pubkey,
+    old_admin: &Pubkey,
+    new_admin: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new(*slasher, false),
+        AccountMeta::new_readonly(*old_admin, true),
+        AccountMeta::new_readonly(*new_admin, true),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::SlasherSetAdmin.try_to_vec().unwrap(),
+    }
+}
+
+pub fn slasher_set_secondary_admin(
+    program_id: &Pubkey,
+    slasher: &Pubkey,
+    admin: &Pubkey,
+    new_admin: &Pubkey,
+    slasher_admin_role: SlasherAdminRole,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new(*slasher, false),
+        AccountMeta::new_readonly(*admin, true),
+        AccountMeta::new_readonly(*new_admin, false),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::SlasherSetSecondaryAdmin(slasher_admin_role)
             .try_to_vec()
             .unwrap(),
     }

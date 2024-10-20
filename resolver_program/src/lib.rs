@@ -6,6 +6,8 @@ mod initialize_slasher;
 mod propose_slash;
 mod set_resolver;
 mod slasher_delegate_token_account;
+mod slasher_set_admin;
+mod slasher_set_secondary_admin;
 mod veto_slash;
 
 use borsh::BorshDeserialize;
@@ -22,6 +24,8 @@ use crate::{
     initialize_slasher::process_initialize_slasher, propose_slash::process_propose_slash,
     set_resolver::process_set_resolver,
     slasher_delegate_token_account::process_slasher_delegate_token_account,
+    slasher_set_admin::process_slasher_set_admin,
+    slasher_set_secondary_admin::process_slasher_set_secondary_admin,
     veto_slash::process_veto_slash,
 };
 
@@ -85,6 +89,16 @@ pub fn process_instruction(
         ResolverInstruction::SlasherDelegateTokenAccount => {
             msg!("Instruction: ExecuteSlash");
             process_slasher_delegate_token_account(program_id, accounts)?;
+        }
+
+        ResolverInstruction::SlasherSetAdmin => {
+            msg!("Instruction: SlasherSetAdmin");
+            process_slasher_set_admin(program_id, accounts)?;
+        }
+
+        ResolverInstruction::SlasherSetSecondaryAdmin(role) => {
+            msg!("Instruction: SlasherSetSecondaryAdmin");
+            process_slasher_set_secondary_admin(program_id, accounts, role)?;
         }
     }
 

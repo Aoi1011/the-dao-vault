@@ -42,6 +42,18 @@ impl Slasher {
         self.index.into()
     }
 
+    /// Replace all secondary admins that were equal to the old admin to the new admin
+    ///
+    /// # Arguments
+    /// * `old_admin` - The old admin Pubkey
+    /// * `new_admin` - The new admin Pubkey
+    pub fn update_secondary_admin(&mut self, old_admin: &Pubkey, new_admin: &Pubkey) {
+        if self.delegate_admin.eq(old_admin) {
+            self.delegate_admin = *new_admin;
+            msg!("Delegate admin set to {:?}", new_admin);
+        }
+    }
+
     pub fn check_admin(&self, candidate_slasher_admin: &Pubkey) -> Result<(), ResolverError> {
         if self.admin.ne(candidate_slasher_admin) {
             msg!("Slasher admin is incorrect");

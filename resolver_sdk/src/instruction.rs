@@ -23,4 +23,21 @@ pub enum ResolverInstruction {
     #[account(4, name = "delegate")]
     #[account(5, name = "token_program")]
     SlasherDelegateTokenAccount,
+
+    /// Sets the admin for a slasher
+    #[account(0, writable, name = "slasher")]
+    #[account(1, signer, name = "old_admin")]
+    #[account(2, signer, name = "new_admin")]
+    SlasherSetAdmin,
+
+    /// Sets the secondary admin for a slasher
+    #[account(0, writable, name = "slasher")]
+    #[account(1, signer, name = "admin")]
+    #[account(2, name = "new_admin")]
+    SlasherSetSecondaryAdmin(SlasherAdminRole),
+}
+
+#[derive(Debug, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
+pub enum SlasherAdminRole {
+    DelegateAdmin,
 }

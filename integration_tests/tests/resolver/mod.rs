@@ -6,6 +6,8 @@ mod initialize_slasher;
 mod propose_slash;
 mod set_resolver;
 mod slasher_delegate_token_account;
+mod slasher_set_admin;
+mod slasher_set_secondary_admin;
 mod veto_slash;
 
 pub(crate) const MINT_AMOUNT: u64 = 100_000;

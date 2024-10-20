@@ -13,6 +13,7 @@ use resolver_core::{
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
     slash_proposal::SlashProposal, slasher::Slasher,
 };
+use resolver_sdk::instruction::SlasherAdminRole;
 use solana_program::{
     clock::Clock, native_token::sol_to_lamports, pubkey::Pubkey, system_instruction::transfer,
 };
@@ -631,6 +632,49 @@ impl ResolverProgramClient {
             )],
             Some(&self.payer.pubkey()),
             &[&self.payer, delegate_admin],
+            blockhash,
+        ))
+        .await
+    }
+
+    pub async fn slasher_set_admin(
+        &mut self,
+        slasher_pubkey: &Pubkey,
+        old_admin: &Keypair,
+        new_admin: &Keypair,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::slasher_set_admin(
+                &resolver_program::id(),
+                slasher_pubkey,
+                &old_admin.pubkey(),
+                &new_admin.pubkey(),
+            )],
+            Some(&old_admin.pubkey()),
+            &[old_admin, new_admin],
+            blockhash,
+        ))
+        .await
+    }
+    pub async fn slasher_set_secondary_admin(
+        &mut self,
+        slasher_pubkey: &Pubkey,
+        admin: &Keypair,
+        new_admin: &Keypair,
+        slasher_admin_role: SlasherAdminRole,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::slasher_set_secondary_admin(
+                &resolver_program::id(),
+                slasher_pubkey,
+                &admin.pubkey(),
+                &new_admin.pubkey(),
+                slasher_admin_role,
+            )],
+            Some(&admin.pubkey()),
+            &[admin],
             blockhash,
         ))
         .await
