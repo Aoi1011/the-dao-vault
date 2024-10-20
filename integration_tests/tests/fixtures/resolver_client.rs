@@ -609,6 +609,33 @@ impl ResolverProgramClient {
         .await
     }
 
+    pub async fn slasher_delegate_token_account(
+        &mut self,
+        slasher_pubkey: &Pubkey,
+        delegate_admin: &Keypair,
+        token_mint: &Pubkey,
+        token_account: &Pubkey,
+        delegate: &Pubkey,
+        token_program_id: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::slasher_delegate_token_account(
+                &resolver_program::id(),
+                slasher_pubkey,
+                &delegate_admin.pubkey(),
+                token_mint,
+                token_account,
+                delegate,
+                token_program_id,
+            )],
+            Some(&self.payer.pubkey()),
+            &[&self.payer, delegate_admin],
+            blockhash,
+        ))
+        .await
+    }
+
     pub async fn process_transaction(&mut self, tx: &Transaction) -> TestResult<()> {
         self.banks_client
             .process_transaction_with_preflight_and_commitment(

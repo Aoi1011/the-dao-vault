@@ -8,6 +8,8 @@ pub enum ResolverError {
 
     #[error("SlasherAdminInvalid")]
     SlasherAdminInvalid,
+    #[error("SlasherDelegateAdminInvalid")]
+    SlasherDelegateAdminInvalid,
 
     #[error("SlashProposalVetoPeriodEnded")]
     SlashProposalVetoPeriodEnded,

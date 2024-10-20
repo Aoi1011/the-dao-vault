@@ -1918,6 +1918,7 @@ dependencies = [
  "spl-associated-token-account",
  "spl-token",
  "spl-token-2022 3.0.4",
+ "test-case",
  "thiserror",
  "tokio",
 ]
@@ -3229,6 +3230,7 @@ version = "0.0.1"
 dependencies = [
  "borsh 0.10.4",
  "jito-vault-program",
+ "shank",
  "solana-program",
  "spl-token",
  "thiserror",

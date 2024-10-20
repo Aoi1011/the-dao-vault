@@ -13,6 +13,9 @@ pub struct Slasher {
     /// The admin pubkey
     pub admin: Pubkey,
 
+    /// The delegate admin can delegate assets from the slasher
+    pub delegate_admin: Pubkey,
+
     /// The slasher index
     index: PodU64,
 
@@ -29,6 +32,7 @@ impl Slasher {
         Self {
             base,
             admin,
+            delegate_admin: admin,
             index: PodU64::from(index),
             bump,
         }
@@ -44,6 +48,30 @@ impl Slasher {
             return Err(ResolverError::SlasherAdminInvalid);
         }
 
+        Ok(())
+    }
+
+    /// Validates the delegate_admin account and ensures it matches the expected delegate_admin.
+    ///
+    /// # Arguments
+    /// * `delegate_admin` - A reference to the [`Pubkey`] representing the delegate_admin Pubkey that is attempting
+    ///   to authorize the operation.
+    ///
+    /// # Returns
+    /// * `Result<(), RestakingError>` - Returns `Ok(())` if the delegate_admin account is valid.
+    ///
+    /// # Errors
+    /// This function will return a [`resolver_sdk::error::ResolverError::SlasherDelegateAdminInvalid`] error in the following case:
+    /// * The `delegate_admin_info` account's public key does not match the expected admin public key stored in `self`.
+    pub fn check_delegate_admin(&self, delegate_admin: &Pubkey) -> Result<(), ResolverError> {
+        if self.delegate_admin.ne(delegate_admin) {
+            msg!(
+                "Incorrect delegate_admin provided, expected {}, received {}",
+                self.delegate_admin,
+                delegate_admin
+            );
+            return Err(ResolverError::SlasherDelegateAdminInvalid);
+        }
         Ok(())
     }
 
