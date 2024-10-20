@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use resolver_core::slasher::Slasher;
+    use resolver_sdk::instruction::SlasherAdminRole;
     use solana_sdk::{signature::Keypair, signer::Signer};
 
     use crate::{
@@ -9,7 +10,7 @@ mod tests {
     };
 
     #[tokio::test]
-    async fn test_slasher_set_admin_ok() {
+    async fn test_slasher_set_secondary_admin_ok() {
         let mut fixture = TestBuilder::new().await;
         let mut resolver_program_client = fixture.resolver_program_client();
 
@@ -42,10 +43,11 @@ mod tests {
         let slasher_root = &slashers_amounts[0].0;
         let new_admin = Keypair::new();
         resolver_program_client
-            .slasher_set_admin(
+            .slasher_set_secondary_admin(
                 &slasher_root.slasher_pubkey,
                 &slasher_root.slasher_admin,
                 &new_admin,
+                SlasherAdminRole::DelegateAdmin,
             )
             .await
             .unwrap();
@@ -55,6 +57,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(slasher.admin, new_admin.pubkey());
+        assert_eq!(slasher.delegate_admin, new_admin.pubkey());
     }
 }
