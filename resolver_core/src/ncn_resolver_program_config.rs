@@ -8,6 +8,9 @@ use solana_program::{account_info::AccountInfo, msg, program_error::ProgramError
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable, AccountDeserialize, ShankAccount)]
 #[repr(C)]
 pub struct NcnResolverProgramConfig {
+    /// The resolver admin of the NCN
+    pub resolver_admin: Pubkey,
+
     /// The length of an epoch in slots
     veto_duration: PodU64,
 
@@ -22,8 +25,9 @@ impl Discriminator for NcnResolverProgramConfig {
 }
 
 impl NcnResolverProgramConfig {
-    pub fn new(veto_duration: u64, bump: u8) -> Self {
+    pub fn new(resolver_admin: Pubkey, veto_duration: u64, bump: u8) -> Self {
         Self {
+            resolver_admin,
             veto_duration: PodU64::from(veto_duration),
             resolver_count: PodU64::from(0),
             bump,

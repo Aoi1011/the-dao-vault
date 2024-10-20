@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use resolver_core::ncn_resolver_program_config::NcnResolverProgramConfig;
+    use solana_sdk::signer::Signer;
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
@@ -37,21 +38,6 @@ mod tests {
             .await
             .unwrap();
 
-        // resolver_program_client
-        //     .do_initialize_config()
-        //     .await
-        //     .unwrap();
-
-        // resolver_program_client
-        //     .do_initialize_ncn_resolver_program_config(
-        //         &Config::find_program_address(&resolver_program::id()).0,
-        //         &ncn_root.ncn_pubkey,
-        //         &ncn_root.ncn_admin,
-        //         VETO_DURATION,
-        //     )
-        //     .await
-        //     .unwrap();
-
         let ncn_resolver_program_config: NcnResolverProgramConfig = resolver_program_client
             .get_account(
                 &NcnResolverProgramConfig::find_program_address(
@@ -63,6 +49,10 @@ mod tests {
             .await
             .unwrap();
 
+        assert_eq!(
+            ncn_resolver_program_config.resolver_admin,
+            ncn_root.ncn_admin.pubkey(),
+        );
         assert_eq!(ncn_resolver_program_config.veto_duration(), VETO_DURATION);
         assert_eq!(ncn_resolver_program_config.resolver_count(), 0);
     }

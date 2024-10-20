@@ -65,7 +65,7 @@ pub fn process_initialize_resolver_program_config(
         &mut ncn_resolver_program_config_data,
     )?;
     *ncn_resolver_program_config =
-        NcnResolverProgramConfig::new(veto_duration, ncn_resolver_program_config_bump);
+        NcnResolverProgramConfig::new(*admin.key, veto_duration, ncn_resolver_program_config_bump);
 
     Ok(())
 }
