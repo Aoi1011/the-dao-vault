@@ -1,3 +1,4 @@
+mod delete_slash_proposal;
 mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;
@@ -51,9 +52,17 @@ pub fn process_instruction(
             process_initialize_config(program_id, accounts)?;
         }
 
-        ResolverInstruction::InitializeNcnResolverProgramConfig { veto_duration } => {
+        ResolverInstruction::InitializeNcnResolverProgramConfig {
+            veto_duration,
+            delete_slash_proposal_duration,
+        } => {
             msg!("Instruction: InitializeNcnResolverProgramConfig");
-            process_initialize_resolver_program_config(program_id, accounts, veto_duration)?;
+            process_initialize_resolver_program_config(
+                program_id,
+                accounts,
+                veto_duration,
+                delete_slash_proposal_duration,
+            )?;
         }
 
         ResolverInstruction::InitializeResolver => {

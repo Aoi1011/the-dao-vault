@@ -14,3 +14,4 @@ pub(crate) const MINT_AMOUNT: u64 = 100_000;
 pub(crate) const DELEGATION_AMOUNT: u64 = 10_000;
 pub(crate) const MAX_SLASH_AMOUNT: u64 = 100;
 pub(crate) const VETO_DURATION: u64 = 100;
+pub(crate) const DELETE_SLASH_PROPOSAL_DURATION: u64 = 100;

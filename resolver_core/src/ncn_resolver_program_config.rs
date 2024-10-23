@@ -14,6 +14,8 @@ pub struct NcnResolverProgramConfig {
     /// The length of an epoch in slots
     veto_duration: PodU64,
 
+    delete_slash_proposal_duration: PodU64,
+
     resolver_count: PodU64,
 
     /// The bump seed for the PDA
@@ -25,10 +27,16 @@ impl Discriminator for NcnResolverProgramConfig {
 }
 
 impl NcnResolverProgramConfig {
-    pub fn new(resolver_admin: Pubkey, veto_duration: u64, bump: u8) -> Self {
+    pub fn new(
+        resolver_admin: Pubkey,
+        veto_duration: u64,
+        delete_slash_proposal_duration: u64,
+        bump: u8,
+    ) -> Self {
         Self {
             resolver_admin,
             veto_duration: PodU64::from(veto_duration),
+            delete_slash_proposal_duration: PodU64::from(delete_slash_proposal_duration),
             resolver_count: PodU64::from(0),
             bump,
         }
@@ -36,6 +44,10 @@ impl NcnResolverProgramConfig {
 
     pub fn veto_duration(&self) -> u64 {
         self.veto_duration.into()
+    }
+
+    pub fn delete_slash_proposal_duration(&self) -> u64 {
+        self.delete_slash_proposal_duration.into()
     }
 
     pub fn resolver_count(&self) -> u64 {

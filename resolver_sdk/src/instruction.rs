@@ -6,6 +6,7 @@ pub enum ResolverInstruction {
     InitializeConfig,
     InitializeNcnResolverProgramConfig {
         veto_duration: u64,
+        delete_slash_proposal_duration: u64,
     },
 
     #[account(0, name = "config")]

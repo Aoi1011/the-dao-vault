@@ -25,6 +25,8 @@ pub struct SlashProposal {
 
     veto_deadline_slot: PodU64,
 
+    delete_deadline_slot: PodU64,
+
     completed: PodBool,
 
     /// The bump seed for the PDA
@@ -45,6 +47,7 @@ impl Default for SlashProposal {
             amount: PodU64::from(0),
             capture_slot: PodU64::from(0),
             veto_deadline_slot: PodU64::from(0),
+            delete_deadline_slot: PodU64::from(0),
             completed: PodBool::from_bool(false),
             bump: 0,
             // reserved: [0; 263],
@@ -67,6 +70,7 @@ impl SlashProposal {
             amount: PodU64::from(amount),
             capture_slot: PodU64::from(capture_slot),
             veto_deadline_slot: PodU64::from(veto_deadline_slot),
+            delete_deadline_slot: PodU64::from(capture_slot),
             completed: PodBool::from_bool(false),
             bump,
             // reserved: [0; 263],
@@ -81,8 +85,16 @@ impl SlashProposal {
         self.veto_deadline_slot.into()
     }
 
+    pub fn delete_deadline_slot(&self) -> u64 {
+        self.delete_deadline_slot.into()
+    }
+
     pub fn completed(&self) -> bool {
         self.completed.into()
+    }
+
+    pub fn set_delete_deadline_slot(&mut self, deadline_slot: u64) {
+        self.veto_deadline_slot = PodU64::from(deadline_slot);
     }
 
     pub fn set_completed(&mut self, completed: bool) {
@@ -111,6 +123,15 @@ impl SlashProposal {
         if self.completed.into() {
             msg!("Slash proposal completed");
             return Err(ResolverError::SlashProposalCompleted);
+        }
+
+        Ok(())
+    }
+
+    pub fn check_delete_deadline_ended(&self, current_slot: u64) -> Result<(), ResolverError> {
+        if self.delete_deadline_slot() < current_slot {
+            msg!("Delete period not ended");
+            return Err(ResolverError::SlashProposalDeletePeriodNotEnded);
         }
 
         Ok(())

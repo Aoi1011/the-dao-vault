@@ -11,7 +11,7 @@ use spl_associated_token_account::{
 };
 use spl_token_2022::extension::{ExtensionType, StateWithExtensionsOwned};
 
-use crate::resolver::VETO_DURATION;
+use crate::resolver::{DELETE_SLASH_PROPOSAL_DURATION, VETO_DURATION};
 
 use super::{
     resolver_client::{ResolverProgramClient, SlasherRoot},
@@ -397,6 +397,7 @@ impl TestBuilder {
                 &ncn_root.ncn_pubkey,
                 &ncn_root.ncn_admin,
                 VETO_DURATION,
+                DELETE_SLASH_PROPOSAL_DURATION,
             )
             .await
             .unwrap();
