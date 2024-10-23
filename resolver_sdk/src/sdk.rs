@@ -333,6 +333,7 @@ pub fn slasher_set_secondary_admin(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn delete_slash_proposal(
     program_id: &Pubkey,
     config: &Pubkey,
