@@ -71,7 +71,11 @@ impl ResolverProgramClient {
     }
 
     pub async fn get_account<T: AccountDeserialize>(&mut self, account: &Pubkey) -> TestResult<T> {
-        let account = self.banks_client.get_account(*account).await?.ok_or(TestError::AccountNotFound)?;
+        let account = self
+            .banks_client
+            .get_account(*account)
+            .await?
+            .ok_or(TestError::AccountNotFound)?;
         Ok(T::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
