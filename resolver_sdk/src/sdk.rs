@@ -36,6 +36,7 @@ pub fn initialize_ncn_resolver_program_config(
     ncn_resolver_program_config: &Pubkey,
     admin: &Pubkey,
     veto_duration: u64,
+    delete_slash_proposal_duration: u64,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
@@ -48,9 +49,12 @@ pub fn initialize_ncn_resolver_program_config(
     Instruction {
         program_id: *program_id,
         accounts,
-        data: ResolverInstruction::InitializeNcnResolverProgramConfig { veto_duration }
-            .try_to_vec()
-            .unwrap(),
+        data: ResolverInstruction::InitializeNcnResolverProgramConfig {
+            veto_duration,
+            delete_slash_proposal_duration,
+        }
+        .try_to_vec()
+        .unwrap(),
     }
 }
 
@@ -177,6 +181,7 @@ pub fn set_resolver(
 pub fn veto_slash(
     program_id: &Pubkey,
     config: &Pubkey,
+    ncn_resolver_program_config: &Pubkey,
     ncn: &Pubkey,
     operator: &Pubkey,
     slasher: &Pubkey,
@@ -187,6 +192,7 @@ pub fn veto_slash(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn_resolver_program_config, false),
         AccountMeta::new_readonly(*ncn, false),
         AccountMeta::new_readonly(*operator, false),
         AccountMeta::new_readonly(*slasher, false),
@@ -208,6 +214,7 @@ pub fn veto_slash(
 pub fn execute_slash(
     program_id: &Pubkey,
     config: &Pubkey,
+    ncn_resolver_program_config: &Pubkey,
     vault_config: &Pubkey,
     ncn: &Pubkey,
     operator: &Pubkey,
@@ -230,6 +237,7 @@ pub fn execute_slash(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn_resolver_program_config, false),
         AccountMeta::new_readonly(*vault_config, false),
         AccountMeta::new_readonly(*ncn, false),
         AccountMeta::new_readonly(*operator, false),
@@ -320,6 +328,36 @@ pub fn slasher_set_secondary_admin(
         program_id: *program_id,
         accounts,
         data: ResolverInstruction::SlasherSetSecondaryAdmin(slasher_admin_role)
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn delete_slash_proposal(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    operator: &Pubkey,
+    slasher: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+    payer: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new_readonly(*slasher, false),
+        AccountMeta::new(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::DeleteSlashProposal
             .try_to_vec()
             .unwrap(),
     }

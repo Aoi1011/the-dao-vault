@@ -16,6 +16,8 @@ pub enum TestError {
     BanksClientError(#[from] BanksClientError),
     #[error(transparent)]
     ProgramError(#[from] ProgramError),
+    #[error("Account not Found")]
+    AccountNotFound,
 }
 
 impl TestError {
@@ -27,7 +29,7 @@ impl TestError {
                 BanksClientError::SimulationError { err, .. } => Some(err.clone()),
                 _ => None,
             },
-            TestError::ProgramError(_) => None,
+            TestError::ProgramError(_) | TestError::AccountNotFound => None,
         }
     }
 }

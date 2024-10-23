@@ -5,7 +5,7 @@ mod tests {
 
     use crate::{
         fixtures::fixture::{ConfiguredVault, TestBuilder},
-        resolver::{MAX_SLASH_AMOUNT, VETO_DURATION},
+        resolver::{DELETE_SLASH_PROPOSAL_DURATION, MAX_SLASH_AMOUNT, VETO_DURATION},
     };
 
     #[tokio::test]
@@ -54,6 +54,10 @@ mod tests {
             ncn_root.ncn_admin.pubkey(),
         );
         assert_eq!(ncn_resolver_program_config.veto_duration(), VETO_DURATION);
+        assert_eq!(
+            ncn_resolver_program_config.delete_slash_proposal_duration(),
+            DELETE_SLASH_PROPOSAL_DURATION
+        );
         assert_eq!(ncn_resolver_program_config.resolver_count(), 0);
     }
 }

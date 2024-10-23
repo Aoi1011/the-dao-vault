@@ -5,7 +5,10 @@ mod tests {
     };
     use solana_sdk::{signature::Keypair, signer::Signer};
 
-    use crate::{fixtures::fixture::TestBuilder, resolver::VETO_DURATION};
+    use crate::{
+        fixtures::fixture::TestBuilder,
+        resolver::{DELETE_SLASH_PROPOSAL_DURATION, VETO_DURATION},
+    };
 
     #[tokio::test]
     async fn test_initialize_resolver_ok() {
@@ -83,6 +86,7 @@ mod tests {
                 &ncn_root.ncn_pubkey,
                 &ncn_root.ncn_admin,
                 VETO_DURATION,
+                DELETE_SLASH_PROPOSAL_DURATION,
             )
             .await
             .unwrap();

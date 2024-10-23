@@ -1,3 +1,4 @@
+mod delete_slash_proposal;
 mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;
@@ -11,6 +12,7 @@ mod slasher_set_secondary_admin;
 mod veto_slash;
 
 use borsh::BorshDeserialize;
+use delete_slash_proposal::process_delete_slash_proposal;
 use resolver_sdk::instruction::ResolverInstruction;
 use solana_program::{
     account_info::AccountInfo, declare_id, entrypoint::ProgramResult, msg,
@@ -51,9 +53,17 @@ pub fn process_instruction(
             process_initialize_config(program_id, accounts)?;
         }
 
-        ResolverInstruction::InitializeNcnResolverProgramConfig { veto_duration } => {
+        ResolverInstruction::InitializeNcnResolverProgramConfig {
+            veto_duration,
+            delete_slash_proposal_duration,
+        } => {
             msg!("Instruction: InitializeNcnResolverProgramConfig");
-            process_initialize_resolver_program_config(program_id, accounts, veto_duration)?;
+            process_initialize_resolver_program_config(
+                program_id,
+                accounts,
+                veto_duration,
+                delete_slash_proposal_duration,
+            )?;
         }
 
         ResolverInstruction::InitializeResolver => {
@@ -99,6 +109,11 @@ pub fn process_instruction(
         ResolverInstruction::SlasherSetSecondaryAdmin(role) => {
             msg!("Instruction: SlasherSetSecondaryAdmin");
             process_slasher_set_secondary_admin(program_id, accounts, role)?;
+        }
+
+        ResolverInstruction::DeleteSlashProposal => {
+            msg!("Instruction: DeleteSlashProposal");
+            process_delete_slash_proposal(program_id, accounts)?;
         }
     }
 

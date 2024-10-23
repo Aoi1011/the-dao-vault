@@ -6,6 +6,7 @@ pub enum ResolverInstruction {
     InitializeConfig,
     InitializeNcnResolverProgramConfig {
         veto_duration: u64,
+        delete_slash_proposal_duration: u64,
     },
 
     #[account(0, name = "config")]
@@ -101,6 +102,8 @@ pub enum ResolverInstruction {
     #[account(1, signer, name = "admin")]
     #[account(2, name = "new_admin")]
     SlasherSetSecondaryAdmin(SlasherAdminRole),
+
+    DeleteSlashProposal,
 }
 
 #[derive(Debug, BorshSerialize, BorshDeserialize, PartialEq, Eq)]

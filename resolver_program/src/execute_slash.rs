@@ -12,6 +12,7 @@ use jito_vault_core::{
 };
 use jito_vault_sdk::error::VaultError;
 use resolver_core::{
+    ncn_resolver_program_config::NcnResolverProgramConfig,
     ncn_slash_proposal_ticket::NcnSlashProposalTicket, resolver::Resolver,
     slash_proposal::SlashProposal, slasher::Slasher,
 };
@@ -21,7 +22,7 @@ use solana_program::{
 };
 
 pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
-    let [config_info, vault_config_info, ncn_info, operator_info, slasher_info, vault_info, slasher_admin_info, ncn_operator_state_info, ncn_vault_ticket_info, operator_vault_ticket_info, vault_ncn_ticket_info, vault_operator_delegation_info, ncn_vault_slasher_ticket_info, vault_ncn_slasher_ticket_info, vault_ncn_slasher_operator_ticket_info, vault_token_account_info, slasher_token_account_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, token_program, jito_vault_program] =
+    let [config_info, ncn_resolver_program_config_info, vault_config_info, ncn_info, operator_info, slasher_info, vault_info, slasher_admin_info, ncn_operator_state_info, ncn_vault_ticket_info, operator_vault_ticket_info, vault_ncn_ticket_info, vault_operator_delegation_info, ncn_vault_slasher_ticket_info, vault_ncn_slasher_ticket_info, vault_ncn_slasher_operator_ticket_info, vault_token_account_info, slasher_token_account_info, resolver_info, slash_proposal_info, ncn_slash_proposal_ticket_info, token_program, jito_vault_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -30,6 +31,16 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     resolver_core::config::Config::load(program_id, config_info, false)?;
     let config_data = config_info.data.borrow();
     let config = resolver_core::config::Config::try_from_slice_unchecked(&config_data)?;
+
+    NcnResolverProgramConfig::load(
+        program_id,
+        ncn_resolver_program_config_info,
+        ncn_info,
+        false,
+    )?;
+    let ncn_resolver_program_config_data = ncn_resolver_program_config_info.data.borrow();
+    let ncn_resolver_program_config =
+        NcnResolverProgramConfig::try_from_slice_unchecked(&ncn_resolver_program_config_data)?;
 
     let ncn_epoch = Clock::get()?
         .slot
@@ -161,6 +172,10 @@ pub fn process_execute_slash(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     slash_proposal.check_completed()?;
 
     slash_proposal.set_completed(true);
+    slash_proposal.set_delete_deadline_slot(
+        slash_proposal.delete_deadline_slot()
+            + ncn_resolver_program_config.delete_slash_proposal_duration(),
+    );
 
     let slasher_seeds = slasher.signing_seeds();
     let seed_slices: Vec<&[u8]> = slasher_seeds.iter().map(|seed| seed.as_slice()).collect();

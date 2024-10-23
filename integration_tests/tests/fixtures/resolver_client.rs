@@ -71,7 +71,11 @@ impl ResolverProgramClient {
     }
 
     pub async fn get_account<T: AccountDeserialize>(&mut self, account: &Pubkey) -> TestResult<T> {
-        let account = self.banks_client.get_account(*account).await?.unwrap();
+        let account = self
+            .banks_client
+            .get_account(*account)
+            .await?
+            .ok_or(TestError::AccountNotFound)?;
         Ok(T::try_from_slice_unchecked(&mut account.data.as_slice())?.clone())
     }
 
@@ -113,6 +117,7 @@ impl ResolverProgramClient {
         ncn: &Pubkey,
         admin: &Keypair,
         veto_duration: u64,
+        delete_slash_proposal_duration: u64,
     ) -> TestResult<()> {
         let ncn_resolver_program_config =
             NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0;
@@ -123,6 +128,7 @@ impl ResolverProgramClient {
             &ncn_resolver_program_config,
             admin,
             veto_duration,
+            delete_slash_proposal_duration,
         )
         .await?;
 
@@ -136,6 +142,7 @@ impl ResolverProgramClient {
         ncn_resolver_program_config: &Pubkey,
         admin: &Keypair,
         veto_duration: u64,
+        delete_slash_proposal_duration: u64,
     ) -> TestResult<()> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
         self.process_transaction(&Transaction::new_signed_with_payer(
@@ -146,6 +153,7 @@ impl ResolverProgramClient {
                 ncn_resolver_program_config,
                 &admin.pubkey(),
                 veto_duration,
+                delete_slash_proposal_duration,
             )],
             Some(&admin.pubkey()),
             &[admin],
@@ -432,6 +440,7 @@ impl ResolverProgramClient {
             &[resolver_sdk::sdk::veto_slash(
                 &resolver_program::id(),
                 &Config::find_program_address(&resolver_program::id()).0,
+                &NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0,
                 ncn,
                 operator,
                 slasher,
@@ -586,6 +595,7 @@ impl ResolverProgramClient {
             &[resolver_sdk::sdk::execute_slash(
                 &resolver_program::id(),
                 &Config::find_program_address(&resolver_program::id()).0,
+                &NcnResolverProgramConfig::find_program_address(&resolver_program::id(), ncn).0,
                 &jito_vault_core::config::Config::find_program_address(&jito_vault_program::id()).0,
                 ncn,
                 operator,
@@ -678,6 +688,33 @@ impl ResolverProgramClient {
             )],
             Some(&admin.pubkey()),
             &[admin],
+            blockhash,
+        ))
+        .await
+    }
+
+    pub async fn delete_slash_proposal(
+        &mut self,
+        ncn: &Pubkey,
+        operator: &Pubkey,
+        slasher: &Pubkey,
+        slash_proposal: &Pubkey,
+        ncn_slash_proposal_ticket: &Pubkey,
+    ) -> TestResult<()> {
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[resolver_sdk::sdk::delete_slash_proposal(
+                &resolver_program::id(),
+                &Config::find_program_address(&resolver_program::id()).0,
+                ncn,
+                operator,
+                slasher,
+                slash_proposal,
+                ncn_slash_proposal_ticket,
+                &self.payer.pubkey(),
+            )],
+            Some(&self.payer.pubkey()),
+            &[&self.payer],
             blockhash,
         ))
         .await

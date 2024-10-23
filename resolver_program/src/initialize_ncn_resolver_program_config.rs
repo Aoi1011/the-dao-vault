@@ -15,6 +15,7 @@ pub fn process_initialize_resolver_program_config(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     veto_duration: u64,
+    delete_slash_proposal_duration: u64,
 ) -> ProgramResult {
     let [config, ncn, ncn_resolver_program_config, admin, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -64,8 +65,12 @@ pub fn process_initialize_resolver_program_config(
     let ncn_resolver_program_config = NcnResolverProgramConfig::try_from_slice_unchecked_mut(
         &mut ncn_resolver_program_config_data,
     )?;
-    *ncn_resolver_program_config =
-        NcnResolverProgramConfig::new(*admin.key, veto_duration, ncn_resolver_program_config_bump);
+    *ncn_resolver_program_config = NcnResolverProgramConfig::new(
+        *admin.key,
+        veto_duration,
+        delete_slash_proposal_duration,
+        ncn_resolver_program_config_bump,
+    );
 
     Ok(())
 }
