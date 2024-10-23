@@ -129,7 +129,7 @@ impl SlashProposal {
     }
 
     pub fn check_delete_deadline_ended(&self, current_slot: u64) -> Result<(), ResolverError> {
-        if self.delete_deadline_slot() < current_slot {
+        if self.delete_deadline_slot() > current_slot {
             msg!("Delete period not ended");
             return Err(ResolverError::SlashProposalDeletePeriodNotEnded);
         }

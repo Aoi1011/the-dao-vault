@@ -1,3 +1,4 @@
+mod delete_slash_proposal;
 mod execute_slash;
 mod initialize_config;
 mod initialize_ncn_resolver_program_config;

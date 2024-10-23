@@ -102,6 +102,8 @@ pub enum ResolverInstruction {
     #[account(1, signer, name = "admin")]
     #[account(2, name = "new_admin")]
     SlasherSetSecondaryAdmin(SlasherAdminRole),
+
+    DeleteSlashProposal,
 }
 
 #[derive(Debug, BorshSerialize, BorshDeserialize, PartialEq, Eq)]

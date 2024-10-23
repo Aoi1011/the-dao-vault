@@ -332,3 +332,32 @@ pub fn slasher_set_secondary_admin(
             .unwrap(),
     }
 }
+
+pub fn delete_slash_proposal(
+    program_id: &Pubkey,
+    config: &Pubkey,
+    ncn: &Pubkey,
+    operator: &Pubkey,
+    slasher: &Pubkey,
+    slash_proposal: &Pubkey,
+    ncn_slash_proposal_ticket: &Pubkey,
+    payer: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*config, false),
+        AccountMeta::new_readonly(*ncn, false),
+        AccountMeta::new_readonly(*operator, false),
+        AccountMeta::new_readonly(*slasher, false),
+        AccountMeta::new(*slash_proposal, false),
+        AccountMeta::new(*ncn_slash_proposal_ticket, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: ResolverInstruction::DeleteSlashProposal
+            .try_to_vec()
+            .unwrap(),
+    }
+}

@@ -38,7 +38,7 @@ pub fn process_delete_slash_proposal(
         ncn_info,
         operator_info,
         slasher_info,
-        false,
+        true,
     )?;
     let slash_proposal_data = slash_proposal_info.data.borrow();
     let slash_proposal = SlashProposal::try_from_slice_unchecked(&slash_proposal_data)?;
@@ -48,7 +48,7 @@ pub fn process_delete_slash_proposal(
         ncn_slash_proposal_ticket_info,
         ncn_info,
         slash_proposal_info,
-        false,
+        true,
     )?;
 
     load_signer(payer, true)?;
@@ -57,6 +57,8 @@ pub fn process_delete_slash_proposal(
     let current_slot = Clock::get()?.slot;
 
     slash_proposal.check_delete_deadline_ended(current_slot)?;
+
+    drop(slash_proposal_data);
 
     close_program_account(program_id, slash_proposal_info, payer)?;
     close_program_account(program_id, ncn_slash_proposal_ticket_info, payer)?;
